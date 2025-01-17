@@ -1,6 +1,6 @@
 # CISO (Chief Information Security Officer) Sample Task Scenarios
 
-This repository provides sample task scenarios of the IT Benchmark for CISO. Each scenario includes a setup for a compliance misconfigured environment and tools to check and address if the misconfiguration is resolved or not.
+Here is an example of Task Scenario used in an automation package to benchmark Agent for CISOs on [the IT-Bench](https://github.ibm.com/project-polaris/agent-bench-automation).
 
 This repository contains following 4 category of scenarios:
 
@@ -12,6 +12,10 @@ This repository contains following 4 category of scenarios:
 ├── 4.upd-cis-b-k8s-kyvernoz
 └── README.md
 ```
+
+Each scenario includes a setup for a compliance misconfigured environment and tools to check and address if the misconfiguration is resolved or not. 
+
+For the detailed design, please refer to [IT-Bench Design Doc](https://github.ibm.com/project-polaris/agent-bench-automation/blob/main/docs/bench-design-doc.md).
 
 ## Scenarios
 
@@ -117,7 +121,7 @@ The evaluation verifies the following to return a pass:
 - Ensure that OPA command runs successfully with the policy.rego against the collected_data.json. 
 - Verify that the OPA outputs expected result.
 
-Please refer to [evaluate.yml](/2.gen-cis-b-k8s-kubectl-opa/playbooks/evaluate.yml) for the details.
+Please refer to [evaluate.yml](/ciso/2.gen-cis-b-k8s-kubectl-opa/playbooks/evaluate.yml) for the details.
 
 #### The contents of the directory
 ```
@@ -176,7 +180,7 @@ The evaluation verifies the following to return a pass:
 - Ensure that OPA command runs successfully with the policy.rego against the collected_data.json. 
 - Verify that the OPA outputs expected result.
 
-Please refer to [evaluate.yml](/3.gen-cis-b-rhel9-ansible-opa/playbooks/evaluate.yml) for the details.
+Please refer to [evaluate.yml](/ciso/3.gen-cis-b-rhel9-ansible-opa/playbooks/evaluate.yml) for the details.
 
 #### The contents of the directory
 ```
