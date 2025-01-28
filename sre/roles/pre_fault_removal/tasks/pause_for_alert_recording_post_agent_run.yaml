@@ -1,0 +1,6 @@
+---
+- name: Pause for 600 seconds pre-fault removal for alert recording
+  pause:
+    seconds: 600
+  tags:
+    - pre_fault_removal

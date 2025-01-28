@@ -1,0 +1,53 @@
+- name: Inject HTTP abort chaos leveraging the Chaos framework
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ kubeconfig }}"
+    definition:
+      apiVersion: chaos-mesh.org/v1alpha1
+      kind: HTTPChaos
+      metadata:
+        name: "{{ target_namespace_name }}-{{ target_label_name1 }}"
+        namespace: "{{ chaos_mesh_namespace_project_name }}"
+      spec:
+        mode: all
+        selector:
+          namespaces:
+            - "{{ target_namespace_name }}"
+          labelSelectors:
+            "app.kubernetes.io/component": "{{ target_label_name1 }}"
+        target: Request
+        port: 8080
+        method: POST
+        path: '*'
+        abort: true
+  register: fault_injection_status
+  tags: chaos_mesh
+  when: is_http_abort_chaos and is_fault_injection
+
+- name: Remove HTTP abort chaos leveraging the Chaos framework
+  kubernetes.core.k8s:
+    state: absent
+    kubeconfig: "{{ kubeconfig }}"
+    definition:
+      apiVersion: chaos-mesh.org/v1alpha1
+      kind: HTTPChaos
+      metadata:
+        name: "{{ target_namespace_name }}-{{ target_label_name1 }}"
+        namespace: "{{ chaos_mesh_namespace_project_name }}"
+      spec:
+        mode: all
+        selector:
+          namespaces:
+            - "{{ target_namespace_name }}"
+          labelSelectors:
+            "app.kubernetes.io/component": "{{ target_label_name1 }}"
+        target: Request
+        port: 8080
+        method: POST
+        path: '*'
+        abort: true
+  register: fault_removal_status
+  tags: chaos_mesh
+  when: is_http_abort_chaos and is_fault_removal
+
+

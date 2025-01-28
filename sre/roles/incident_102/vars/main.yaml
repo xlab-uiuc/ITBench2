@@ -1,0 +1,6 @@
+---
+scenario_domain: sre
+sample_application: dsb_hotel_reservation
+
+target_namespace_name: "{{ deathstarbench_hotelreservation_app_namespace_project_name }}"
+target_deployment_name: "search"

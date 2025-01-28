@@ -1,0 +1,35 @@
+---
+- name: Observability Stack + Sample Applications + Fault Injection
+  hosts: localhost
+
+  vars_files:
+    - group_vars/all
+    - group_vars/documentation
+    - group_vars/observability_tools
+    - group_vars/sample_applications
+    - group_vars/fault_injection
+    - group_vars/sre_agent
+    - group_vars/book_keeping
+    - group_vars/evaluation
+    - group_vars/e2e
+
+  roles:
+    - role: observability_tools
+    - role: sample_applications
+    - role: fault_injection
+    - role: post_fault_injection
+    - role: pre_fault_removal
+    - role: fault_removal
+    - role: sre_agent
+    - role: documentation
+    - role: book_keeping
+    - role: telemetry_access
+    - role: evaluation
+    - role: bundle_status
+    - role: bundle_info
+    - role: e2e
+
+  tasks:
+    - name: Include incident role 
+      ansible.builtin.import_role:
+        name: "incident_{{ incident_number }}"

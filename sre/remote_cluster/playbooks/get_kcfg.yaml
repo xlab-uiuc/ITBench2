@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  vars:
+    state_store: "s3://{{ s3name }}"
+  vars_files:
+    - variables.yaml
+    - secret.yaml
+  vars_prompt:
+    - name: "cluster_name"
+      prompt: "provide the cluster name"
+      private: no
+  tasks:
+
+    - name: Set kops path for Linux
+      set_fact:
+        kops_path: "/usr/local/bin/kops"
+      when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Fedora' or ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    - name: Set kops path for macOS
+      set_fact:
+        kops_path: "{{ '/opt/homebrew/bin/kops' if ansible_architecture == 'arm64' else '/usr/local/bin/kops' }}"
+      when: ansible_distribution == 'MacOSX'
+
+    - name: export kubeconfig
+      command:
+        cmd: "{{ kops_path }} export kubecfg --admin --name={{ cluster_name }} --state=s3://{{ s3name }} --kubeconfig /tmp/{{ cluster_name }}.yaml"
+
+    - name: "location_msg"
+      debug:
+        msg:
+          -  " exported to /tmp/{{ cluster_name }}.yaml"

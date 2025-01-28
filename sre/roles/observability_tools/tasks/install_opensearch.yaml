@@ -1,0 +1,38 @@
+---
+- name: Add Helm chart repo for OpenSearch
+  kubernetes.core.helm_repository:
+    name: opensearch
+    kubeconfig_path: "{{ kubeconfig }}"
+    repo_url: "https://opensearch-project.github.io/helm-charts"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Update Helm repo
+  kubernetes.core.helm:
+    name: dummy
+    kubeconfig_path: "{{ kubeconfig }}"
+    state: absent
+    release_namespace: "{{ opensearch_namespace_project_name }}"
+    update_repo_cache: true
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Deploy OpenSearch
+  kubernetes.core.helm:
+    name: "{{ opensearch_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: opensearch/opensearch
+    chart_version: "{{ opensearch_chart_version }}"
+    release_namespace: "{{ opensearch_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    values: "{{ lookup('template', 'install_opensearch.values.yaml') | from_yaml }}"
+    wait_timeout: "5m"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"

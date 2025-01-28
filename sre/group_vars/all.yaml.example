@@ -1,0 +1,5 @@
+kubeconfig: "/tmp/irl-sre-bench-test-m4.xlarge-aws.k8s.local.yaml"
+sre_agent_kubeconfig: "/tmp/sre-agent.local.yaml"
+
+# assertion filename 
+assertion_filepath: "/tmp/assertion.json"

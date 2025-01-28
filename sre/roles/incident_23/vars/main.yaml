@@ -1,0 +1,6 @@
+---
+scenario_domain: sre
+sample_application: otel_astronomy_shop
+
+is_install_chaos_mesh: false
+target_deployment_name: "{{ otel_astronomy_app_installation_name }}-checkoutservice"
