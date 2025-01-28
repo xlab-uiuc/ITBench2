@@ -1,0 +1,14 @@
+---
+- import_tasks: initialize_assertion_json.yaml
+- import_tasks: install_elasticsearch.yaml
+- import_tasks: install_loki.yaml
+- import_tasks: install_ingress.yaml
+- import_tasks: install_prometheus_grafana.yaml
+- import_tasks: install_jaeger.yaml
+- import_tasks: install_opensearch.yaml
+- import_tasks: install_k8sevents_to_grafana.yaml
+- import_tasks: check_grafana_status.yaml
+- import_tasks: set_up_datasources_for_grafana.yaml
+- import_tasks: set_up_golden_signal_alert_definitions.yaml
+- import_tasks: set_up_dashboards_for_grafana.yaml
+- import_tasks: uninstall_observability_stack.yaml

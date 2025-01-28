@@ -1,0 +1,53 @@
+---
+- name: Clone Saurabh's fork of DeathStarBench Hotel Reservations
+  ansible.builtin.git:
+    repo: https://github.com/saurabhjha1/DeathStarBench.git
+    dest: roles/sample_applications/DeathStarBench
+    single_branch: yes
+    version: master
+    force: yes
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "dsb_hotel_reservation"
+
+- name: Identify and set Prometheus service name
+  ansible.builtin.shell: KUBECONFIG={{ kubeconfig }} kubectl get services -o=jsonpath='{.items[?(@.spec.ports[0].port==9090)].metadata.name}' -n {{ prometheus_namespace_project_name }} | awk '{ if ($1 == "prometheus-operated") print $2; else print $1 }'
+  register: command_output
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "dsb_hotel_reservation"
+
+- ansible.builtin.set_fact:
+    prometheus_service_name: "{{ command_output.stdout }}"
+    when: command_output.stdout | length > 0
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "dsb_hotel_reservation"
+
+- name: Deploy Deathstar Hotel Reservations 
+  kubernetes.core.helm:
+    name: "{{ deathstarbench_hotelreservation_app_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: roles/sample_applications/DeathStarBench/hotelReservation/helm-chart/hotelreservation
+    release_namespace: "{{ deathstarbench_hotelreservation_app_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    wait_timeout: "5m"
+    set_values:
+      - value: "global.monitoring.otelAddress=otel-collector-{{ deathstarbench_hotelreservation_app_installation_name }}.{{ deathstarbench_hotelreservation_app_namespace_project_name }}.svc.cluster.local"
+        value_type: raw
+      - value: "global.monitoring.defaultJaegerEnabled=false"
+        value_type: raw
+      - value: "global.monitoring.centralJaegerAddress={{ jaeger_installation_name }}-collector.{{ jaeger_namespace_project_name }}.svc.cluster.local"
+        value_type: raw
+      - value: "global.monitoring.centralPrometheusAddress=http://{{ prometheus_service_name }}.{{ prometheus_namespace_project_name }}:9090/api/v1/otlp"
+        value_type: raw
+      - value: "global.nameOverride={{ deathstarbench_hotelreservation_app_installation_name }}"
+        value_type: raw
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "dsb_hotel_reservation"

@@ -1,0 +1,151 @@
+---
+- name: Add Helm chart repo from the Prometheus community
+  kubernetes.core.helm_repository:
+    name: open-telemetry
+    kubeconfig_path: "{{ kubeconfig }}"
+    repo_url: "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "otel_astronomy_shop"
+
+- name: Update Helm repo
+  kubernetes.core.helm:
+    name: dummy
+    kubeconfig_path: "{{ kubeconfig }}"
+    state: absent
+    release_namespace: "{{ otel_astronomy_app_namespace_project_name }}"
+    update_repo_cache: true
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "otel_astronomy_shop"
+
+- name: Identify and set Prometheus service name
+  ansible.builtin.shell: KUBECONFIG={{ kubeconfig }} kubectl get services -o=jsonpath='{.items[?(@.spec.ports[0].port==9090)].metadata.name}' -n {{ prometheus_namespace_project_name }} | awk '{ if ($1 == "prometheus-operated") print $2; else print $1 }'
+  register: command_output
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "otel_astronomy_shop"
+
+- ansible.builtin.set_fact:
+    prometheus_service_name: "{{ command_output.stdout }}"
+    when: command_output.stdout | length > 0
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "otel_astronomy_shop"
+
+- name: Deploy (unmodified) OpenTelemetry's Astronomy Shop Demo
+  kubernetes.core.helm:
+    name: "{{ otel_astronomy_app_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: open-telemetry/opentelemetry-demo
+    chart_version: "{{ otel_astronomy_app_chart_version }}"
+    release_namespace: "{{ otel_astronomy_app_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    values:
+      default:
+        envOverrides:
+          - name: OTEL_SERVICE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: "metadata.labels['app.kubernetes.io/name']"
+    set_values:
+      - value: jaeger.enabled=false
+        value_type: raw
+      - value: grafana.enabled=false
+        value_type: raw
+      - value: prometheus.enabled=false
+        value_type: raw
+      - value: opensearch.enabled=false
+        value_type: raw
+      - value: "opentelemetry-collector.config.exporters.otlp.endpoint={{ jaeger_installation_name }}-collector.{{ jaeger_namespace_project_name }}.svc.cluster.local:4317"
+        value_type: string
+      - value: "opentelemetry-collector.config.exporters.otlphttp\/prometheus.endpoint=http://{{ prometheus_service_name }}.{{ prometheus_namespace_project_name }}:9090/api/v1/otlp"
+        value_type: string
+      - value: "opentelemetry-collector.config.exporters.opensearch.http.endpoint=http://opensearch-cluster-master.{{ opensearch_namespace_project_name }}.svc.cluster.local:9200"
+        value_type: string
+      - value: 'opentelemetry-collector.config.connectors.spanmetrics={"dimensions": [{"name": "namespace", "default": "{{ otel_astronomy_app_namespace_project_name }}"}]}'
+        value_type: json
+      - value: opentelemetry-collector.resources.limits.memory=512Mi
+        value_type: string
+      - value: components.loadgenerator.imageOverride.repository=quay.io/mudiverm/srebench-loadgen
+        value_type: raw
+      - value: components.loadgenerator.imageOverride.tag=0.3
+        value_type: raw
+      - value: components.flagd.command[0]=/flagd-build
+        value_type: string
+      - value: components.flagd.command[1]=start
+        value_type: string
+      - value: components.flagd.command[2]=-p
+        value_type: string
+      - value: components.flagd.command[3]=8013
+        value_type: string
+      - value: components.flagd.command[4]=--uri
+        value_type: string
+      - value: components.flagd.command[5]=file:./etc/flagd/demo.flagd.json
+        value_type: string
+      - value: components.flagd.resources.limits.memory=144Mi
+        value_type: string
+    wait_timeout: "5m"
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "otel_astronomy_shop"
+
+- name: Service monitor to get metrics for the otel-collector pod
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ kubeconfig }}"
+    definition:
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        name: "otel-collector-metrics-to-prometheus"
+        namespace: "{{ otel_astronomy_app_namespace_project_name }}"
+        labels:
+            "for_instance_in_namespace": "{{ prometheus_namespace_project_name }}"
+      spec:
+        endpoints:
+        - interval: 10s
+          path: /metrics
+          port: metrics
+        selector:
+          matchLabels:
+            "component": "standalone-collector"
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "otel_astronomy_shop"
+
+# - name: Enable targeted load (while avoiding the recommendation service)
+#   ansible.builtin.import_role:
+#     name: fault_injection
+#   vars:
+#       is_injection: true
+#       is_fault_injection: true
+#       is_otel_astronomy_shop_dynamic_load: true
+#       dynamic_load_vars:
+#         - name: BROWSE_PRODUCT_WEIGHT
+#           value: "150"
+#         - name: GET_RECOMMENDATIONS_WEIGHT
+#           value: "0"
+#         - name: GET_ADS_WEIGHT
+#           value: "150"
+#         - name: VIEW_CART_WEIGHT
+#           value: "150"
+#         - name: ADD_TO_CART_WEIGHT
+#           value: "150"
+#         - name: CHECKOUT_WEIGHT
+#           value: "150"
+#         - name: CHECKOUT_MULTI_WEIGHT
+#           value: "150"
+#         - name: FLOOD_HOME_WEIGHT
+#           value: "150"
+#   tags:
+#     - sample_applications
+#     - install_opentelemetry_astronomy_shop

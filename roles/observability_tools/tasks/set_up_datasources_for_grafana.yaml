@@ -1,0 +1,209 @@
+---
+- name:  Tasks associated with leveraging ingress
+  ansible.builtin.include_tasks:
+    file: leverage_ingress.yaml
+    apply:
+      tags:
+        - install_tools
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name:  Tasks associated with leveraging port forwarding
+  ansible.builtin.include_tasks:
+    file: leverage_port_forwarding.yaml
+    apply:
+      tags:
+        - install_tools
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Check if service {{ prometheus_namespace_project_name }}-grafana on {{ dynamic_port }} responds with a 200 OK to a GET request
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}"
+    method: GET
+    status_code: 200
+    timeout: 30
+  register: result
+  retries: 10
+  delay: 5
+  until: result.status == 200
+  tags:
+    - install_tools
+  when:
+    - ingress_hostname is undefined or ingress_hostname | trim == ''
+    - domain == "sre" or domain == "finops"
+
+- name: Add Loki datasource
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/datasources"
+    method: POST
+    body: "{\"name\": \"loki\", \"type\": \"loki\", \"access\": \"proxy\", \"url\": \"http://{{ loki_installation_name }}.{{ loki_namespace_project_name }}:3100\", \"user\": \"\", \"database\": \"\", \"basicAuth\": false, \"isDefault\": false, \"jsonData\": {\"tlsAuth\": false, \"tlsSkipVerify\": false}}"
+    body_format: json
+    status_code: 200, 409
+  register: loki_datasource_response
+  retries: 10
+  delay: 5
+  until: loki_datasource_response.status == 200 or loki_datasource_response.status == 409
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_loki_endpoint
+
+- name: Set Loki datasource UID
+  set_fact:
+    loki_datasource_uid: "{{ loki_datasource_response.json.datasource.uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_loki_endpoint
+  ignore_errors: yes
+
+- name: Print Loki datasourceUid
+  ansible.builtin.debug:
+    msg: "{{ loki_datasource_uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_loki_endpoint
+  ignore_errors: yes
+
+- name: Add Prometheus datasource
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/datasources"
+    method: POST
+    body: "{\"name\": \"prometheus-external\", \"uid\": \"prometheus-external\", \"type\": \"prometheus\", \"access\": \"proxy\", \"url\": \"http://{{ prometheus_service_name }}.{{ prometheus_namespace_project_name }}:9090/\", \"user\": \"\", \"database\": \"\", \"basicAuth\": false, \"isDefault\": false, \"jsonData\": {\"httpMethod\": \"POST\", \"timeInterval\": \"30s\"}, \"tlsAuth\": false, \"tlsSkipVerify\": true}"
+    body_format: json
+    status_code: 200, 409
+  register: prometheus_datasource_response
+  retries: 10
+  delay: 5
+  until: prometheus_datasource_response.status == 200 or prometheus_datasource_response.status == 409
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_prometheus_query_endpoint
+
+- name: Set Prometheus datasource UID
+  set_fact:
+    prometheus_datasource_uid: "{{ prometheus_datasource_response.json.datasource.uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_prometheus_query_endpoint
+
+- name: Print Prometheus datasourceUid
+  ansible.builtin.debug:
+    msg: "{{ prometheus_datasource_uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_prometheus_query_endpoint
+
+- name: Add Jaeger datasource (when enable_prometheus_query_endpoint=false)
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/datasources"
+    method: POST
+    body: "{\"name\": \"jaeger\", \"type\": \"jaeger\", \"access\": \"proxy\", \"url\": \"http://{{ jaeger_installation_name }}-query.{{ jaeger_namespace_project_name }}.svc.cluster.local:80\", \"user\": \"\", \"database\": \"\", \"basicAuth\": false, \"isDefault\": false, \"queries\": [], \"tags\": []}}}"
+    body_format: json
+    status_code: 200, 409
+  register: jaeger_datasource_response
+  retries: 10
+  delay: 5
+  until: jaeger_datasource_response.status == 200 or jaeger_datasource_response.status == 409
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_jaeger_query_endpoint | bool
+    - not enable_prometheus_query_endpoint
+
+- name: Set Jaeger datasource UID (when enable_prometheus_query_endpoint=false)
+  set_fact:
+    jaeger_datasource_uid: "{{ jaeger_datasource_response.json.datasource.uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_jaeger_query_endpoint | bool
+    - not enable_prometheus_query_endpoint
+
+- name: Add Jaeger datasource (when enable_prometheus_query_endpoint=true)
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/datasources"
+    method: POST
+    body: "{\"name\": \"jaeger\", \"type\": \"jaeger\", \"access\": \"proxy\", \"url\": \"http://{{ jaeger_installation_name }}-query.{{ jaeger_namespace_project_name }}.svc.cluster.local:80\", \"user\": \"\", \"database\": \"\", \"basicAuth\": false, \"isDefault\": false, \"jsonData\": {\"tracesToMetrics\": {\"datasourceUid\": \"{{ prometheus_datasource_uid }}\", \"queries\": [], \"tags\": []}}}"
+    body_format: json
+    status_code: 200, 409
+  register: jaeger_datasource_response
+  retries: 10
+  delay: 5
+  until: jaeger_datasource_response.status == 200 or jaeger_datasource_response.status == 409
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_prometheus_query_endpoint 
+    - enable_jaeger_query_endpoint | bool
+
+- name: Set Jaeger datasource UID (when enable_prometheus_query_endpoint=true)
+  set_fact:
+    jaeger_datasource_uid: "{{ jaeger_datasource_response.json.datasource.uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_prometheus_query_endpoint 
+    - enable_jaeger_query_endpoint | bool
+
+- name: Print Jaeger datasourceUid
+  ansible.builtin.debug:
+    msg: "{{ jaeger_datasource_uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+    - enable_jaeger_query_endpoint | bool
+
+- name: Add OpenSearch datasource
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/datasources"
+    method: POST
+    body: "{\"name\": \"opensearch\", \"uid\": \"opensearch\", \"type\": \"grafana-opensearch-datasource\", \"access\": \"proxy\", \"url\": \"http://opensearch-cluster-master.{{ opensearch_namespace_project_name }}.svc.cluster.local:9200\", \"basicAuth\": false, \"isDefault\": false, \"jsonData\": {\"database\": \"otel\", \"flavor\": \"opensearch\", \"logLevelField\": \"severity\", \"logMessageField\": \"body\", \"pplEnabled\": \"true\", \"timeField\": \"observedTimestamp\", \"tlsAuth\": false, \"tlsSkipVerify\": true, \"version\": \"{{ opensearch_version_number }}\"}}"
+    body_format: json
+    status_code: 200, 409
+  register: opensearch_datasource_response
+  retries: 10
+  delay: 5
+  until: opensearch_datasource_response.status == 200 or opensearch_datasource_response.status == 409
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Set OpenSearch datasource UID
+  set_fact:
+    opensearch_datasource_uid: "{{ opensearch_datasource_response.json.datasource.uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+  ignore_errors: yes
+
+- name: Print OpenSearch datasourceUid
+  ansible.builtin.debug:
+    msg: "{{ opensearch_datasource_uid }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+  ignore_errors: yes

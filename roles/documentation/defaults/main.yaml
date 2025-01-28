@@ -1,0 +1,59 @@
+valid_documentation_schema:
+  type: array
+  items:
+    type: object
+    properties:
+      "id":
+        type: integer
+      "name":
+        type: string
+      "description":
+        type: string
+      "application":
+        type: string
+        enum: ['otel_astronomy_shop', 'deathstarbench_hotel_reservations', 'Other']
+      "fault":
+        type: array
+        items:
+          type: object
+          properties:
+            "entity":
+              type: object
+              properties:
+                "name":
+                  type: string
+                "kind":
+                  type: string
+                  enum: [ "User", "Pod", "Service", "Deployment", "Node", "ConfigMap", "Other" ]
+                "changed":
+                  type: object
+                  properties:
+                    "element":
+                      type: string
+                    "from":
+                      type: string
+                    "to":
+                      type: string
+                  required: ["element", "from", "to"]
+                  additionalProperties: false
+                "comment":
+                  type: string
+              required: [ "name", "kind" ]
+              additionalProperties: false
+            "condition":
+              type: string
+            "category":
+              type: string
+              enum: [ "Resource Saturation", "Resource Unavailable", "Configuration Setting", "Other" ]
+          required: [ "entity", "condition" ]
+          additionalProperties: false
+      "manual_actions":
+        type: array
+        items:
+          type: string
+      "automations":
+        type: array
+        items:
+          type: string
+    additionalProperties: false
+    required: ["id", "fault", "manual_actions", "automations"]

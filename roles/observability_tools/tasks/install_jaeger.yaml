@@ -1,0 +1,78 @@
+---
+- name: Add Helm chart repo for Jaeger
+  kubernetes.core.helm_repository:
+    name: jaegertracing
+    kubeconfig_path: "{{ kubeconfig }}"
+    repo_url: "https://jaegertracing.github.io/helm-charts"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Update Helm repo
+  kubernetes.core.helm:
+    name: dummy
+    kubeconfig_path: "{{ kubeconfig }}"
+    state: absent
+    release_namespace: "{{ jaeger_namespace_project_name }}"
+    update_repo_cache: true
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Identify and set Prometheus service name
+  ansible.builtin.shell: KUBECONFIG={{ kubeconfig }} kubectl get services -o=jsonpath='{.items[?(@.spec.ports[0].port==9090)].metadata.name}' -n {{ prometheus_namespace_project_name }} | awk '{ if ($1 == "prometheus-operated") print $2; else print $1 }'
+  register: command_output
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- ansible.builtin.set_fact:
+    prometheus_service_name: "{{ command_output.stdout }}"
+    when: command_output.stdout | length > 0
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Deploy Jaeger
+  kubernetes.core.helm:
+    name: "{{ jaeger_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: jaegertracing/jaeger
+    chart_version: "{{ jaeger_chart_version }}"
+    release_namespace: "{{ jaeger_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    set_values:
+      - value: provisionDataStore.cassandra=false
+        value_type: raw
+      - value: storage.type=elasticsearch
+        value_type: raw
+      - value: storage.elasticsearch.host="{{ es_installation_name }}-elasticsearch.{{ es_namespace_project_name }}"
+        value_type: raw
+      - value: storage.elasticsearch.port=9200
+        value_type: raw
+      - value: prometheus.server-url="http://{{ prometheus_service_name }}.{{ prometheus_namespace_project_name }}:9090"
+        value_type: raw
+      - value: prometheus.query.support-spanmetrics-connector=true
+        value_type: raw
+      - value: collector.service.zipkin.port=9411
+        value_type: raw
+      - value: collector.service.otlp.grpc.name="otlp-grpc"
+        value_type: raw
+      - value: collector.service.otlp.grpc.port=4317
+        value_type: raw
+      - value: collector.service.otlp.http.name="otlp-http"
+        value_type: raw
+      - value: collector.service.otlp.http.port=4318
+        value_type: raw
+      - value: "query.enabled={{ true if (enable_jaeger_query_endpoint | lower | bool) else false}}"
+        value_type: raw
+    wait_timeout: "5m"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"

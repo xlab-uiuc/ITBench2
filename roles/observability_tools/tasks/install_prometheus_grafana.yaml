@@ -1,0 +1,78 @@
+---
+- name: Add Helm chart repo from the Prometheus community
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    kubeconfig_path: "{{ kubeconfig }}"
+    repo_url: "https://prometheus-community.github.io/helm-charts"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Update Helm repo
+  kubernetes.core.helm:
+    name: dummy
+    kubeconfig_path: "{{ kubeconfig }}"
+    state: absent
+    release_namespace: "{{ prometheus_namespace_project_name }}"
+    update_repo_cache: true
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Deploy the Prometheus - Grafana stack
+  kubernetes.core.helm:
+    name: "{{ prometheus_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: prometheus-community/kube-prometheus-stack 
+    chart_version: "{{ prometheus_chart_version }}"
+    release_namespace: "{{ prometheus_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    set_values:
+      - value: prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+        value_type: raw
+      - value: prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false
+        value_type: raw
+      - value: prometheus.prometheusSpec.enableFeatures[0]=otlp-write-receiver
+        value_type: raw
+      - value: "prometheus.defaultRules.additionalRuleLabels[0].for_instance_in_namespace={{ prometheus_namespace_project_name }}"
+        value_type: raw
+      - value: grafana.ingress.enabled=true
+        value_type: raw
+      - value: grafana.ingress.ingressClassName=nginx
+        value_type: raw
+      - value: grafana.deleteDataSources[0].name="Loki"
+        value_type: raw
+      - value: grafana.deleteDataSources[0].orgId=1
+        value_type: raw
+      - value: "grafana.ingress.annotations.nginx\\\\.ingress\\\\.kubernetes\\\\.io\\/rewrite-target=\\ \\/$2"
+        value_type: raw
+      - value: grafana.ingress.path="/{{ prometheus_namespace_project_name}}(/|$)(.*)"
+        value_type: raw
+      - value: grafana.fullnameOverride="{{ prometheus_namespace_project_name }}-grafana"
+        value_type: raw
+      - value: grafana.plugins[0]=grafana-opensearch-datasource
+        value_type: raw
+      - value: "grafana.grafana\\\\.ini.server.root\\_url=http://%(domain)s/{{ prometheus_namespace_project_name }}"
+        value_type: raw
+      - value: 'grafana.grafana\\.ini.auth.disable_login_form=true'
+        value_type: raw
+      - value: 'grafana.grafana\\.ini.auth.disable_login_form=true'
+        value_type: raw
+      - value: 'grafana.grafana\\.ini.auth.disable_signout_menu=true'
+        value_type: raw
+      - value: 'grafana.grafana\\.ini.auth\\.anonymous.enabled=true'
+        value_type: raw
+      - value: 'grafana.grafana\\.ini.auth\\.anonymous.org_role="Admin"'
+        value_type: raw
+      - value: alertmanager.ingress.enabled=true
+        value_type: raw
+      - value: "prometheus.enabled={{ true if enable_prometheus_query_endpoint else false }}"
+        value_type: raw
+    wait_timeout: "5m"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"

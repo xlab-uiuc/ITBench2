@@ -1,0 +1,466 @@
+---
+- name: Get AWX service information
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ awx_kubeconfig }}"
+    kind: Service
+    namespace: awx
+    name: awx-deployment-service
+  register: awx_service_information
+  tags:
+    - awx_scenario_setup
+
+- name: Set `controller_host` value for the Ansible tower
+  set_fact:
+    controller_host: "http://{{ awx_service_information.resources[0].status.loadBalancer.ingress[0].hostname }}"
+  tags:
+    - awx_scenario_setup
+
+- name: Set `controller_username` value for the Ansible tower
+  set_fact:
+    controller_username: "admin"
+  tags:
+    - awx_scenario_setup
+
+- name: Get AWX secret information
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ awx_kubeconfig }}"
+    kind: Secret
+    namespace: awx
+    name: awx-deployment-admin-password
+  register: awx_secret_information
+  tags:
+    - awx_scenario_setup
+
+- name: Set `controller_password` value for the Ansible tower
+  set_fact:
+    controller_password: "{{ awx_secret_information.resources[0].data.password | b64decode }}"
+  tags:
+    - awx_scenario_setup
+
+- name: Add/Remove the Kubeconfig credential
+  awx.awx.credential:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+    description: "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+    organization: Default
+    credential_type: Kubeconfig
+    inputs:
+      kubeconfig: "{{ lookup('file', relevant_kubeconfig_file_path) }}"
+    state: "{{ state }}"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to install the observability stack
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--InstallObservability-Stack"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+    job_tags: "observability"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to install the sample application
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Install-Sample-Application-{{ sample_app }}"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+    job_tags: "install_{{ sample_app }}"
+  when: sample_app is defined
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to setup for telemetry access
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Setup-For-Telemetry-Access"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+    job_tags: "telemetry_access"
+  when: sample_app is defined
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template for trace gathering
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Trace-Gathering"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "cron_jobs/trace_recorder.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to trigger fault
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Trigger-Fault"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+      is_fault_injection: true
+      incident_number: "{{scenario_number}}"
+      otel_astronomy_app_namespace_project_name: otel-demo
+      otel_astronomy_app_installation_name: otel-demo
+      deathstarbench_hotelreservation_app_namespace_project_name: hotel-reservations
+      deathstarbench_hotelreservation_app_installation_name: hotel-reservations
+    job_tags: "incident_{{scenario_number}}"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template for post fault injection task(s)
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Post-Fault-Injection"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+    job_tags: "post_fault_injection"
+  tags:
+    - awx_scenario_setup
+
+- name: Run the SRE Agent
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Run-SRE-Agent"
+    job_type: "run"
+    project: "Project-GitHub-Lumyn"
+    playbook: "deployments/ansible/base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 2700
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+      sre_agent_directory: /runner/project
+      conda_sh_directory: /opt/conda/etc/profile.d/conda.sh
+      conda_env_directory: /runner/project/lumyn_env
+      is_watsonx: "{{ true if agent_configuration['llm_for_agents_config']['llm_backend'] == 'watsonx' else false }}"
+      is_azure: "{{ true if agent_configuration['llm_for_agents_config']['llm_backend'] == 'azure' else false }}"
+      llm_model_name: "{{ agent_configuration['llm_for_agents_config']['llm_model_name'] }}"
+      llm_base_url: "{{ agent_configuration['llm_for_agents_config']['llm_base_url'] }}"
+      llm_api_key: "{{ agent_configuration['llm_for_agents_config']['llm_api_key'] }}"
+      llm_project_id: "{{ agent_configuration['llm_for_agents_config']['llm_project_id'] if agent_configuration['llm_for_agents_config']['llm_backend'] == 'watsonx' else null }}"
+      llm_configuration_parameters: "{{ agent_configuration['llm_for_agents_config']['llm_configuration_parameters'] if agent_configuration['llm_for_agents_config']['llm_configuration_parameters'] is defined else null }}"
+      enable_god_mode: "{{ agent_configuration['llm_for_agents_config']['enable_god_mode'] }}"
+      agent_analytics_sdk_username: "{{ agent_configuration['agent_analytics_sdk']['git_username'] }}"
+      agent_analytics_sdk_token: "{{ agent_configuration['agent_analytics_sdk']['git_token'] }}"
+      sre_agent_max_runtime_in_seconds: 900
+    job_tags: "sre_agent"
+  tags:
+    - awx_scenario_setup
+
+- name: Node pause in lieu of SRE Agent
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Node-Pause"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 900
+    job_tags: "sre_agent"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template for pre fault removal task(s)
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Pre-Fault-Removal"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+    job_tags: "pre_fault_removal"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to remove fault
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Remove-Fault"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+      is_fault_removal: true
+      incident_number: "{{scenario_number}}"
+      otel_astronomy_app_namespace_project_name: otel-demo
+      otel_astronomy_app_installation_name: otel-demo
+      deathstarbench_hotelreservation_app_namespace_project_name: hotel-reservations
+      deathstarbench_hotelreservation_app_installation_name: hotel-reservations
+    job_tags: "incident_{{scenario_number}}"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to check for alerts
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Check-for-Alerts"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+      is_book_keeping: true
+      otel_astronomy_app_namespace_project_name: otel-demo
+      otel_astronomy_app_installation_name: otel-demo
+      hotel_reservations_app_namespace_project_name: otel-demo
+      hotel_reservations_app_installation_name: otel-demo
+    job_tags: "book_keeping"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to turn alert recorder on
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Alert-Recorder-On"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "cron_jobs/alert_recorder_init.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWX
+    extra_vars:
+      controller_host: "{{ controller_host }}"
+      scenario_number: "{{ scenario_number }}"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to turn alert recorder off
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Alert-Recorder-Off"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "cron_jobs/alert_recorder_deinit.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWX
+    extra_vars:
+      controller_host: "{{ controller_host }}"
+      scenario_number: "{{ scenario_number }}"
+  tags:
+    - awx_scenario_setup
+
+- name: De-initialize alert recorder being executed every minute
+  awx.awx.schedule:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Schedule for Alert Recorder - {{ scenario_number }}"
+    state: absent
+    timeout: 1800
+    unified_job_template: "Scenario-{{ scenario_number }}--Setup-Alert-Recorder"
+  ignore_errors: yes
+  when:
+    state == "absent"
+  tags:
+    - awx_scenario_setup
+
+- name: Removing job template pertaining to alert recorder
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Setup-Alert-Recorder"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    state: absent
+    timeout: 1800
+  when:
+    state == "absent"
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to uninstall the sample application
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--Uninstall-Sample-Application-{{ sample_app }}"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+      - Credential-AWS
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+    job_tags: "uninstall_{{ sample_app }}"
+  when: sample_app is defined
+  tags:
+    - awx_scenario_setup
+
+- name: Creating/removing job template to uninstall the observability stack
+  awx.awx.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    name: "Scenario-{{ scenario_number }}--UninstallObservability-Stack"
+    job_type: "run"
+    project: "Project-GitHub-IT-Automation-Bench"
+    playbook: "base.yaml"
+    inventory: "Demo Inventory"
+    organization: "Default"
+    execution_environment: "AWX-EE-Custom"
+    state: "{{ state }}"
+    timeout: 1800
+    credentials:
+      - "Credential-Kubeconfig-Scenario-{{scenario_number}}"
+    extra_vars:
+      is_otel_astronomy_shop_modified: "{{ sample_app == 'modified_opentelemetry_astronomy_shop' }}"
+      is_deathstarbench_hotel_reservations: "{{ sample_app == 'deathstarbench_hotel_reservations' }}"
+    job_tags: "uninstall_observability_stack"
+  tags:
+    - awx_scenario_setup

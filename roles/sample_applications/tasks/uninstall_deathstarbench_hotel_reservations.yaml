@@ -1,0 +1,12 @@
+---
+- name: Uninstall / remove DeathStarBench Hotel Reservations
+  kubernetes.core.helm:
+    name: "{{ deathstarbench_hotelreservation_app_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: roles/sample_applications/DeathStarBench/hotelReservation/helm-chart/hotelreservation
+    release_namespace: "{{ deathstarbench_hotelreservation_app_namespace_project_name }}"
+    state: absent
+  tags:
+    - uninstall_sample_applications
+  when:
+    - sample_application == "dsb_hotel_reservation"

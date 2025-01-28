@@ -1,0 +1,9 @@
+---
+- name: Uninstall the Kubernetes topology mapper
+  kubernetes.core.helm:
+    name: "k8s-topology-manager"
+    kubeconfig_path: "{{ kubeconfig }}"
+    release_namespace: "kube-system"
+    state: absent
+  tags:
+    - pre_fault_removal

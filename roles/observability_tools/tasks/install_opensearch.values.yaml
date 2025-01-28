@@ -1,0 +1,10 @@
+config:
+  opensearch.yml: |
+    cluster.name: opensearch-cluster
+    # Bind to all interfaces because we don't know what IP address will be assigned
+    network.host: 0.0.0.0
+    plugins.security.disabled: true
+
+extraEnvs:
+- name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+  value: "Opensearch@admin@password@1234"
