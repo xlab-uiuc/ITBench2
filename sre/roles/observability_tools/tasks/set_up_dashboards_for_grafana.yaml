@@ -1,0 +1,101 @@
+---
+- name:  Tasks associated with leveraging ingress
+  ansible.builtin.include_tasks:
+    file: leverage_ingress.yaml
+    apply:
+      tags:
+        - install_tools
+  tags:
+    - install_tools
+  when:
+    - domain == "sre"
+
+- name:  Tasks associated with leveraging port forwarding
+  ansible.builtin.include_tasks:
+    file: leverage_port_forwarding.yaml
+    apply:
+      tags:
+        - install_tools
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Check if service {{ prometheus_namespace_project_name }}-grafana on {{ dynamic_port }} responds with a 200 OK to a GET request
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}"
+    method: GET
+    status_code: 200
+    timeout: 30
+  register: result
+  retries: 10
+  delay: 5
+  until: result.status == 200
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Add Spanmetrics Demo Dashboard from OpenTelemetry's Astronomy Shop Demo
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/dashboards/db"
+    method: POST
+    body: "{{ lookup('ansible.builtin.file','dashboards/spanmetrics_demo_dashboard.json') }}"
+    status_code: 200
+    body_format: json
+  register: spanmetrics_demo_dashboard_result
+  retries: 10
+  delay: 5
+  until: spanmetrics_demo_dashboard_result.status == 200
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Add Demo Dashboard from OpenTelemetry's Astronomy Shop Demo
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/dashboards/db"
+    method: POST
+    body: "{{ lookup('ansible.builtin.file','dashboards/demo_dashboard.json') }}"
+    status_code: 200
+    body_format: json
+  register: demo_dashboard_result
+  retries: 10
+  delay: 5
+  until: demo_dashboard_result.status == 200
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Add OpenTelemetry Collector Dashboard from OpenTelemetry's Astronomy Shop Demo
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/dashboards/db"
+    method: POST
+    body: "{{ lookup('ansible.builtin.file','dashboards/opentelemetry_collector.json') }}"
+    status_code: 200
+    body_format: json
+  register: opentelemetry_collector_dashboard_result
+  retries: 10
+  delay: 5
+  until: opentelemetry_collector_dashboard_result.status == 200
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Add OpenTelemetry Collector Dataflow Dashboard from OpenTelemetry's Astronomy Shop Demo
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/dashboards/db"
+    method: POST
+    body: "{{ lookup('ansible.builtin.file','dashboards/opentelemetry_collector_data_flow.json') }}"
+    status_code: 200
+    body_format: json
+  register: opentelemetry_collector_dataflow_dashboard_result
+  retries: 10
+  delay: 5
+  until: opentelemetry_collector_dataflow_dashboard_result.status == 200
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"

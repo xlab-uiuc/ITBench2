@@ -1,0 +1,499 @@
+[
+  {
+    "id": 5,
+    "uid": "fdzg3zy3n1atce",
+    "orgID": 1,
+    "folderUID": "AstronomyNotifications",
+    "ruleGroup": "AstronomyAlerts",
+    "title": "Error Rate is Above Threshold",
+    "condition": "C",
+    "data": [
+      {
+        "refId": "A",
+        "queryType": "",
+        "relativeTimeRange": {
+          "from": 120,
+          "to": 0
+        },
+        "datasourceUid": "prometheus-external",
+        "model": {
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (service_name, namespace) (delta(traces_span_metrics_calls_total{status_code=\"STATUS_CODE_ERROR\", service_name!~\"flagd|otel-demo-loadgenerator\"}[2m]))",
+          "instant": true,
+          "intervalMs": 1000,
+          "legendFormat": "__auto",
+          "maxDataPoints": 43200,
+          "range": false,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "queryType": "",
+        "relativeTimeRange": {
+          "from": 120,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "params": [],
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "reducer": "last",
+          "refId": "B",
+          "settings": {
+            "mode": "dropNN"
+          },
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "C",
+        "queryType": "",
+        "relativeTimeRange": {
+          "from": 120,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "params": [],
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ],
+    "updated": "2024-09-30T11:52:01Z",
+    "noDataState": "OK",
+    "execErrState": "OK",
+    "for": "1m",
+    "annotations": {
+      "description": "VALUE = {{ $value }}\\n  LABELS = {{ $labels }}",
+      "summary": "Error rate is too high for service {{ $labels.service_name }} in namespace {{ $labels.namespace }}."
+    },
+    "isPaused": false,
+    "notification_settings": {
+      "receiver": "grafana-default-email"
+    },
+    "record": null
+  },
+  {
+    "id": 6,
+    "uid": "adzg4wya99ts0a",
+    "orgID": 1,
+    "folderUID": "AstronomyNotifications",
+    "ruleGroup": "AstronomyAlerts",
+    "title": "Latency is too high",
+    "condition": "C",
+    "data": [
+      {
+        "refId": "A",
+        "queryType": "",
+        "relativeTimeRange": {
+          "from": 120,
+          "to": 0
+        },
+        "datasourceUid": "prometheus-external",
+        "model": {
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "histogram_quantile(0.95, sum by(le, service_name, namespace) (rate(traces_span_metrics_duration_milliseconds_bucket{service_name!~\"flagd|otel-demo-loadgenerator\"}[2m])))",
+          "instant": true,
+          "intervalMs": 1000,
+          "legendFormat": "__auto",
+          "maxDataPoints": 43200,
+          "range": false,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "queryType": "",
+        "relativeTimeRange": {
+          "from": 120,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "params": [],
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "reducer": "last",
+          "refId": "B",
+          "settings": {
+            "mode": "dropNN"
+          },
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "C",
+        "queryType": "",
+        "relativeTimeRange": {
+          "from": 120,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [1500],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "params": [],
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ],
+    "updated": "2024-09-30T11:52:01Z",
+    "noDataState": "OK",
+    "execErrState": "OK",
+    "for": "0s",
+    "annotations": {
+      "description": "VALUE = {{ $value }}\\n  LABELS = {{ $labels }}",
+      "summary": "Latency for service {{ $labels.service_name }} in namespace {{ $labels.namespace }} is too high."
+    },
+    "isPaused": false,
+    "notification_settings": {
+      "receiver": "grafana-default-email"
+    },
+    "record": null
+  },
+  {
+        "uid": "ee9glsnfiamtcb",
+        "title": "Cluster status",
+        "condition": "C",
+        "orgID": 1,
+        "folderUID": "AstronomyNotifications",
+        "ruleGroup": "AstronomyAlerts",
+        "data":
+        [
+            {
+                "refId": "A",
+                "relativeTimeRange":
+                {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "prometheus",
+                "model":
+                {
+                    "disableTextWrap": false,
+                    "editorMode": "code",
+                    "expr": "sum by(namespace) (kube_pod_status_phase{phase=\"Running\"})",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
+                    "instant": true,
+                    "intervalMs": 1000,
+                    "legendFormat": "__auto",
+                    "maxDataPoints": 43200,
+                    "range": false,
+                    "refId": "A",
+                    "useBackend": false
+                }
+            },
+            {
+                "refId": "D",
+                "relativeTimeRange":
+                {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "prometheus",
+                "model":
+                {
+                    "datasource":
+                    {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum by(namespace) (kube_pod_status_phase{phase=\"Failed\"})",
+                    "instant": true,
+                    "intervalMs": 1000,
+                    "legendFormat": "__auto",
+                    "maxDataPoints": 43200,
+                    "range": false,
+                    "refId": "D"
+                }
+            },
+            {
+                "refId": "E",
+                "relativeTimeRange":
+                {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "prometheus",
+                "model":
+                {
+                    "datasource":
+                    {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum by(namespace) (kube_pod_status_phase{phase=\"Pending\"})",
+                    "instant": true,
+                    "intervalMs": 1000,
+                    "legendFormat": "__auto",
+                    "maxDataPoints": 43200,
+                    "range": false,
+                    "refId": "E"
+                }
+            },
+            {
+                "refId": "F",
+                "relativeTimeRange":
+                {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "prometheus",
+                "model":
+                {
+                    "datasource":
+                    {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum by(namespace) (kube_pod_status_phase{phase=~\"Pending|Failed\"})",
+                    "instant": true,
+                    "intervalMs": 1000,
+                    "legendFormat": "__auto",
+                    "maxDataPoints": 43200,
+                    "range": false,
+                    "refId": "F"
+                }
+            },
+            {
+                "refId": "C",
+                "relativeTimeRange":
+                {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "__expr__",
+                "model":
+                {
+                    "conditions":
+                    [
+                        {
+                            "evaluator":
+                            {
+                                "params":
+                                [
+                                    0,
+                                    10
+                                ],
+                                "type": "gt"
+                            },
+                            "operator":
+                            {
+                                "type": "and"
+                            },
+                            "query":
+                            {
+                                "params":
+                                [
+                                    "C"
+                                ]
+                            },
+                            "reducer":
+                            {
+                                "params":
+                                [],
+                                "type": "last"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "datasource":
+                    {
+                        "type": "__expr__",
+                        "uid": "__expr__"
+                    },
+                    "expression": "B",
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "refId": "C",
+                    "type": "threshold"
+                }
+            },
+            {
+                "refId": "B",
+                "relativeTimeRange":
+                {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "__expr__",
+                "model":
+                {
+                    "conditions":
+                    [
+                        {
+                            "evaluator":
+                            {
+                                "params":
+                                [
+                                    0,
+                                    0
+                                ],
+                                "type": "gt"
+                            },
+                            "operator":
+                            {
+                                "type": "and"
+                            },
+                            "query":
+                            {
+                                "params":
+                                []
+                            },
+                            "reducer":
+                            {
+                                "params":
+                                [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "datasource":
+                    {
+                        "name": "Expression",
+                        "type": "__expr__",
+                        "uid": "__expr__"
+                    },
+                    "expression": "F",
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "reducer": "last",
+                    "refId": "B",
+                    "settings":
+                    {
+                        "mode": "dropNN"
+                    },
+                    "type": "reduce"
+                }
+            }
+        ],
+        "noDataState": "NoData",
+        "execErrState": "Error",
+        "for": "1m",
+        "annotations":
+        {
+            "description": "Namespace {{ $labels.namespace }} has {{ $values.A.Value }} pods Running state, {{ $values.D.Value }} pods in Failed state and {{ $values.E.Value }} pods in Pending state.",
+            "summary": "{{ $labels.namespace }} has  {{ $values.D.Value }} pod failures."
+        },
+        "labels":
+        {},
+        "isPaused": false,
+        "notification_settings":
+        {
+            "receiver": "grafana-default-email"
+        }
+    }
+]

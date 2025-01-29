@@ -1,0 +1,64 @@
+---
+- name: Add Helm chart repo for K8s-Events-Exporter from Bitnami
+  kubernetes.core.helm_repository:
+    name: bitnami
+    kubeconfig_path: "{{ kubeconfig }}"
+    repo_url: "https://raw.githubusercontent.com/bitnami/charts/refs/heads/index/bitnami/"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Update Helm repo
+  kubernetes.core.helm:
+    name: dummy
+    kubeconfig_path: "{{ kubeconfig }}"
+    state: absent
+    release_namespace: "{{ loki_namespace_project_name }}"
+    update_repo_cache: true
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Deploy K8s-Events-Exporter
+  kubernetes.core.helm:
+    name: "{{ event_exporter_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: bitnami/kubernetes-event-exporter
+    chart_version: "{{ event_exporter_chart_version }}"
+    release_namespace: "{{ loki_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    set_values:
+      - value: config.leaderElection={}
+        value_type: json
+      - value: config.logLevel=debug
+        value_type: raw
+      - value: config.logFormat=pretty
+        value_type: raw
+      - value: config.metricsNamePrefix="event_exporter_"
+        value_type: raw
+      - value: config.receivers[0].name="stdout"
+        value_type: raw
+      - value: config.receivers[0].file.path="/dev/stdout"
+        value_type: raw
+      - value: config.receivers[0].file.layout={}
+        value_type: json
+      - value: config.receivers[1].name="loki"
+        value_type: raw
+      - value: config.receivers[1].loki.url="http://loki-{{ loki_namespace_project_name}}.{{ loki_namespace_project_name }}:3100/loki/api/v1/push"
+        value_type: raw
+      - value: config.receivers[1].loki.streamLabels.source="kubernetes-event-exporter"
+        value_type: raw
+      - value: config.receivers[1].loki.streamLabels.container="kubernetes-event-exporter"
+        value_type: raw
+      - value: config.route.routes[0].match[0].receiver="stdout"
+        value_type: raw
+      - value: config.route.routes[0].match[1].receiver="loki"
+        value_type: raw
+    wait_timeout: "5m"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"

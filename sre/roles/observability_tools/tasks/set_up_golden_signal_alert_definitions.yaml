@@ -1,0 +1,162 @@
+---
+- name:  Tasks associated with leveraging ingress
+  ansible.builtin.include_tasks:
+    file: leverage_ingress.yaml
+    apply:
+      tags:
+        - install_tools
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name:  Tasks associated with leveraging port forwarding
+  ansible.builtin.include_tasks:
+    file: leverage_port_forwarding.yaml
+    apply:
+      tags:
+        - install_tools
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Check if service {{ prometheus_namespace_project_name }}-grafana on {{ dynamic_port }} responds with a 200 OK to a GET request
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}"
+    method: GET
+    status_code: 200
+    timeout: 30
+  register: result
+  retries: 10
+  delay: 5
+  until: result.status == 200
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Create Grafana folder
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/folders"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    body: >
+      {
+        "uid": "{{ grafana_folder_uid }}",
+        "title": "{{ grafana_folder_title }}"
+      }
+    body_format: json
+    status_code: 200,409,412  # 409 means the folder already exists
+    validate_certs: no
+  register: create_folder_result
+  retries: 10
+  delay: 5
+  until: create_folder_result.status == 200 or result.status == 409 or result.status == 412
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Print folder creation result
+  debug:
+    var: create_folder_result
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Load generic alert rules from JSON file
+  set_fact:
+    alert_rules_payload: "{{ lookup('ansible.builtin.file', 'alert_rules/generic_golden_alert_rules.json')| from_json }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Update folderUID and ruleGroup in generic alert rules
+  set_fact:
+    generic_updated_alert_rules: >
+      {{
+        alert_rules_payload | map('combine', {'folderUID': grafana_folder_uid, 'ruleGroup': grafana_group_uid }) | list
+      }}
+  tags:
+     - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Save modified generic alert rules to file
+  copy:
+    content: "{{ generic_updated_alert_rules | to_nice_json }}"
+    dest: "/tmp/modified_generic_alert_rules.json"
+    backup: yes  # Create a backup of the destination file if it exists 
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Print generic golden alert rules payload as JSON
+  debug:
+    var: generic_updated_alert_rules
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Create generic golden alert rules using Grafana API
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/v1/provisioning/alert-rules"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    body: "{{ item }}"  # Use item to represent each element in the array
+    body_format: json
+    status_code: 201, 409
+  register: generic_golden_rules_response
+  loop: "{{ generic_updated_alert_rules }}"  # Iterate over the array
+  retries: 10
+  delay: 5
+  until: generic_golden_rules_response.status == 201 or generic_golden_rules_response.status == 409
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Load kafka related rules from JSON
+  set_fact: 
+    kafka_alert_rules_payload: "{{ lookup('ansible.builtin.file', 'alert_rules/kafka_consumer_connection_alert.json')| from_json }}"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Update folderUID and ruleGroup in generic alert rules
+  set_fact:
+    kafka_updated_alert_rules: >
+      {{
+        kafka_alert_rules_payload | map('combine', {'folderUID': grafana_folder_uid, 'ruleGroup': grafana_group_uid }) | list
+      }}
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Create kafka golden alert rules using Grafana API
+  ansible.builtin.uri:
+    url: "{{ grafana_url }}/api/v1/provisioning/alert-rules"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    body: "{{ item }}"  # Use item to represent each element in the array
+    body_format: json
+    status_code: 201, 409
+  register: kafka_golden_alert_response
+  loop: "{{ kafka_updated_alert_rules }}"  # Iterate over the array
+  retries: 10
+  delay: 5
+  until: kafka_golden_alert_response.status == 201 or kafka_golden_alert_response.status == 409
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"

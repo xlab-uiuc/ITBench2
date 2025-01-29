@@ -1,0 +1,148 @@
+- name: Uninstall K8s-Events-Exporter
+  kubernetes.core.helm:
+    name: "{{ event_exporter_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    release_namespace: "{{ loki_namespace_project_name }}"
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Uninstall OpenSearch
+  kubernetes.core.helm:
+    name: "{{ opensearch_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    release_namespace: "{{ opensearch_namespace_project_name }}"
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Uninstall Jaeger
+  kubernetes.core.helm:
+    name: "{{ jaeger_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    release_namespace: "{{ jaeger_namespace_project_name }}"
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Uninstall the Prometheus - Grafana stack
+  kubernetes.core.helm:
+    name: "{{ prometheus_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    release_namespace: "{{ prometheus_namespace_project_name }}"
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Uninstall Loki
+  kubernetes.core.helm:
+    name: "{{ loki_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    release_namespace: "{{ loki_namespace_project_name }}"
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Uninstall Elasticsearch
+  kubernetes.core.helm:
+    name: "{{ es_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    release_namespace: "{{ es_namespace_project_name }}"
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Uninstall Ingress
+  kubernetes.core.helm:
+    name: "{{ ingress_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    release_namespace: "{{ ingress_namespace_project_name }}"
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Remove the namespace associated with OpenSearch
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    name: "{{ opensearch_namespace_project_name }}"
+    api_version: v1
+    kind: Namespace
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Remove the namespace associated with Jaeger
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    name: "{{ jaeger_namespace_project_name }}"
+    api_version: v1
+    kind: Namespace
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Remove the namespace associated with Prometheus
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    name: "{{ prometheus_namespace_project_name }}"
+    api_version: v1
+    kind: Namespace
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Remove the namespace associated with Loki
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    name: "{{ loki_namespace_project_name }}"
+    api_version: v1
+    kind: Namespace
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Remove the namespace associated with Elasticsearch
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    name: "{{ es_namespace_project_name }}"
+    api_version: v1
+    kind: Namespace
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Remove the namespace associated with Ingress
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    name: "{{ ingress_namespace_project_name }}"
+    api_version: v1
+    kind: Namespace
+    state: absent
+  tags:
+    - uninstall_tools
+  when:
+    - domain == "sre" or domain == "finops"

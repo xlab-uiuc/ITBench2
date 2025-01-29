@@ -1,0 +1,42 @@
+---
+- name: Add Helm chart repo for Elasticsearch
+  kubernetes.core.helm_repository:
+    name: bitnami
+    kubeconfig_path: "{{ kubeconfig }}"
+    repo_url: "https://raw.githubusercontent.com/bitnami/charts/refs/heads/index/bitnami/"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Update Helm repo
+  kubernetes.core.helm:
+    name: dummy
+    kubeconfig_path: "{{ kubeconfig }}"
+    state: absent
+    release_namespace: "{{ es_namespace_project_name }}"
+    update_repo_cache: true
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Deploy Elasticsearch
+  kubernetes.core.helm:
+    name: "{{ es_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: bitnami/elasticsearch
+    chart_version: "{{ es_chart_version }}"
+    release_namespace: "{{ es_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    set_values:
+      - value: master.persistence.size="32Gi"
+        value_type: raw
+      - value: data.persistence.size="32Gi"
+        value_type: raw
+    wait_timeout: "5m"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"

@@ -1,0 +1,136 @@
+[
+    {
+        "id": 9,
+        "uid": "ee4qhx5m4xam8b",
+        "orgID": 1,
+        "folderUID": "AstronomyNotifications",
+        "ruleGroup": "AstronomyAlerts",
+        "title": "kafka connection close",
+        "condition": "C",
+        "data": [
+            {
+                "refId": "A",
+                "relativeTimeRange": {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "prometheus-external",
+                "model": {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus-external"
+                    },
+                    "disableTextWrap": false,
+                    "editorMode": "builder",
+                    "expr": "kafka_consumer_connection_close_rate > 0",
+                    "fullMetaSearch": false,
+                    "hide": false,
+                    "includeNullMetadata": true,
+                    "instant": true,
+                    "intervalMs": 1000,
+                    "legendFormat": "__auto",
+                    "maxDataPoints": 43200,
+                    "range": false,
+                    "refId": "A",
+                    "useBackend": false
+                }
+            },
+            {
+                "refId": "B",
+                "relativeTimeRange": {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "__expr__",
+                "model": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "B"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "last"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "datasource": {
+                        "type": "__expr__",
+                        "uid": "__expr__"
+                    },
+                    "expression": "A",
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "reducer": "count",
+                    "refId": "B",
+                    "settings": {
+                        "mode": "dropNN"
+                    },
+                    "type": "reduce"
+                }
+            },
+            {
+                "refId": "C",
+                "relativeTimeRange": {
+                    "from": 600,
+                    "to": 0
+                },
+                "datasourceUid": "__expr__",
+                "model": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    0
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "C"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "last"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "datasource": {
+                        "type": "__expr__",
+                        "uid": "__expr__"
+                    },
+                    "expression": "B",
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "refId": "C",
+                    "type": "threshold"
+                }
+            }
+        ],
+        "noDataState": "OK",
+        "execErrState": "OK",
+        "for": "1m",
+        "annotations": {},
+        "labels": {},
+        "isPaused": false,
+        "notification_settings": {
+            "receiver": "grafana-default-email"
+        },
+         "record": null
+    }
+]

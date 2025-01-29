@@ -1,0 +1,44 @@
+---
+- name: Inject request body tamper chaos leveraging the Chaos framework
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ kubeconfig }}"
+    definition:
+      apiVersion: chaos-mesh.org/v1alpha1
+      kind: HTTPChaos
+      metadata:
+        name: "{{ target_namespace_name }}-{{ target_label_name1 }}"
+        namespace: "{{ chaos_mesh_namespace_project_name }}"
+      spec:
+        mode: all
+        target: Request
+        port: 8080
+        method: POST
+        path: '*'
+        selector:
+          namespaces:
+            - "{{ target_namespace_name }}"
+          labelSelectors:
+            "app.kubernetes.io/component": "{{ target_label_name1 }}"
+        patch:
+          body:
+            type: JSON
+            value: '{"email": "12345", "order": "error body"}'
+  register: fault_injection_status
+  tags: chaos_mesh
+  when: is_request_body_tamper_chaos and is_fault_injection
+
+- name: Remove request body tamper chaos leveraging the Chaos framework
+  kubernetes.core.k8s:
+    state: patched
+    kubeconfig: "{{ kubeconfig }}"
+    definition:
+      apiVersion: chaos-mesh.org/v1alpha1
+      kind: HTTPChaos
+      metadata:
+        name: "{{ target_namespace_name }}-{{ target_label_name1 }}"
+        namespace: "{{ chaos_mesh_namespace_project_name }}"
+        finalizers: []
+  register: fault_injection_status
+  tags: chaos_mesh
+  when: is_request_body_tamper_chaos and is_fault_removal

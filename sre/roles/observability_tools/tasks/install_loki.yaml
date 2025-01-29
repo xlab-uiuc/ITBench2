@@ -1,0 +1,42 @@
+---
+- name: Add Helm chart repo for Loki
+  kubernetes.core.helm_repository:
+    name: grafana
+    kubeconfig_path: "{{ kubeconfig }}"
+    repo_url: "https://grafana.github.io/helm-charts"
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Update Helm repo
+  kubernetes.core.helm:
+    name: dummy
+    kubeconfig_path: "{{ kubeconfig }}"
+    state: absent
+    release_namespace: "{{ loki_namespace_project_name }}"
+    update_repo_cache: true
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"
+
+- name: Deploy Loki
+  kubernetes.core.helm:
+    name: "{{ loki_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: grafana/loki-stack
+    chart_version: "{{ loki_chart_version }}"
+    release_namespace: "{{ loki_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    wait_timeout: "5m"
+    set_values:
+      - value: loki.image.tag={{ loki_version_number }}
+        value_type: string
+      - value: "loki.enabled={{ true if enable_loki_endpoint else false }}"
+        value_type: raw
+  tags:
+    - install_tools
+  when:
+    - domain == "sre" or domain == "finops"

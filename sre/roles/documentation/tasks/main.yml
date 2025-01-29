@@ -1,0 +1,2 @@
+---
+- import_tasks: collect_documentation.yaml
