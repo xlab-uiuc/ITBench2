@@ -8,6 +8,8 @@ from logging import basicConfig as logging_basicConfig
 from logging import Logger, getLogger
 from typing import List
 
+SIMPLE_TYPES = {'string', 'integer', 'boolean', ('string', 'null')}
+
 
 def main(argv):
     parser = ArgumentParser(description="Extract change tickets from Service Now")
@@ -57,8 +59,13 @@ def main(argv):
         for one_data in data_in:
             logger.debug(f">>> {json.dumps(one_data)}")
             if set(one_data.keys()) != set(main_columns):
-                logger.error(f"Unexpected values provided for ID {one_data['ID']}: {list(one_data.keys())}")
-                exit(-2)
+                for expected_col in main_columns:
+                    if expected_col not in set(one_data.keys()):
+                        one_data[expected_col] = None
+                if set(one_data.keys()) != set(main_columns):
+                    surprises = [colname for colname in one_data.keys() if colname not in set(main_columns)]
+                    logger.error(f"Unexpected values provided for ID {one_data['id']}: {surprises}")
+                    exit(-2)
             col_html = html_from_schema(schema=parsed_schema,
                                         data=one_data,
                                         markdown_safe=True,
@@ -116,16 +123,21 @@ def read_schema_object(raw_schema: dict) -> list:
     processed = list()
     for fieldname, curr_info in raw_schema.items():
         curr_type = curr_info['type']
-        if curr_type in {'string', 'integer'}:
+        if isinstance(curr_type, list):
+            curr_type = tuple(curr_type)  # for type selections like ["string", "null"]
+        if curr_type in SIMPLE_TYPES:
             type_detail = curr_info.get("enum", [])
         elif curr_type == "object":
             type_detail = read_schema_object(curr_info['properties'])
         elif curr_type == "array":
             item_type = curr_info['items']['type']
-            if item_type in {'string', 'integer'}:
+            if item_type in SIMPLE_TYPES:
                 type_detail = item_type
             elif item_type == "object":
                 type_detail = read_schema_object(curr_info['items']['properties'])
+            elif item_type == "array" and curr_info['items']['items']['type'] in SIMPLE_TYPES:
+                # TODO This is a hack for now to handle an array of arrays of strings
+                type_detail = 'string'
             else:
                 raise Exception(f"Not currently handling schema arrays of type {item_type}")
         else:
@@ -154,7 +166,7 @@ def html_from_schema(schema: list,
                 html_out.append("")
             continue
         curr_type = curr_info['type']
-        if curr_type in {'string', 'integer'}:
+        if curr_type in SIMPLE_TYPES:
             safe_contents = make_string_safe(markdown_safe=markdown_safe,
                                              original=str(curr_data),
                                              max_textwidth=max_textwidth)
@@ -173,10 +185,19 @@ def html_from_schema(schema: list,
             html_out.append("<b>"+html.escape(curr_fieldname)+"</b><ul><li>" +
                             "</li><li>".join(object_content)+"</li></ul>")
         elif curr_type == 'array':
-            if isinstance(curr_info['type_detail'], str) and curr_info['type_detail'] in {"string", "integer"}:
+            if isinstance(curr_info['type_detail'], str) \
+                    and curr_info['type_detail'] in SIMPLE_TYPES:
                 list_strings = [make_string_safe(markdown_safe=markdown_safe,
                                                  original=str(one_elt),
                                                  max_textwidth=max_textwidth)
+                                for one_elt in curr_data]
+            elif isinstance(curr_info['type_detail'], list) \
+                    and curr_info['type_detail'] == {"array"}:
+                # TODO: This isn't very pretty yet.  Fix if you have a minute.
+                list_strings = [", ".join([make_string_safe(markdown_safe=markdown_safe,
+                                                            original=str(sub_elt),
+                                                            max_textwidth=max_textwidth)
+                                           for sub_elt in one_elt])
                                 for one_elt in curr_data]
             else:
                 list_content = [html_from_schema(schema=curr_info['type_detail'],

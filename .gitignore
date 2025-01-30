@@ -22,3 +22,32 @@ DEBUG_*
 # Python virtual environment files
 
 venv/
+
+# evaluation-specific ignore files
+evaluation/paper_data/*
+ground_truths.json
+Incident_Data.md
+Incident_Data.html
+
+
+# non opensource incidents
+roles/incident_12/*
+roles/incident_13/*
+roles/incident_14/*
+roles/incident_15/*
+roles/incident_16/*
+roles/incident_17/*
+roles/incident_18/*
+roles/incident_19/*
+roles/incident_2/*
+roles/incident_20/*
+roles/incident_25/*
+roles/incident_28/*
+roles/incident_29/*
+roles/incident_32/*
+roles/incident_34/*
+roles/incident_5/*
+roles/incident_6/*
+roles/incident_7/*
+roles/incident_8/*
+roles/incident_9/*
