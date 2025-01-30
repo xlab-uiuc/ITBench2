@@ -1,6 +1,6 @@
 # vars.yaml
 target_ns: paa
-cluster_name: paa
+cluster_name: ciso-scenario
 
 bundle_id: "k8s-opa/cis-b-gen/5.2.5"
 bundle_title: "CIS Benchmark for K8S 5.2.5 (OPA)"

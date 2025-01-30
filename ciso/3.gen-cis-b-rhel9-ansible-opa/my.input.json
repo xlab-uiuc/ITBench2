@@ -1,0 +1,11 @@
+{
+  "inventory_host": "rhel9_servers",
+  "target_server": {
+    "address": "ciso-server1.sl.cloud9.ibm.com",
+    "username": "root",
+    "sshkey": "/Users/yana/.ssh/iris_phrase_less",
+    "python_interpreter": "/usr/bin/python3",
+    "alias": "RHEL9 Machine"
+  },
+  "shared_workspace": "/tmp"
+}

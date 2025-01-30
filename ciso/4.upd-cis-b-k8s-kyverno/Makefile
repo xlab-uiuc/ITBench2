@@ -11,7 +11,7 @@ help:
 	@echo "Option INPUT_FILE=<path to bundle input file>"
 	@echo "help   - Display this help information"
 
-export WORK_DIR = /tmp/pac-bundle/policy-adapt/scenario1
+export WORK_DIR = /tmp/scenario-ciso-4
 
 INPUT_FILE ?=
 DEFAULT_INPUT_FILE := input.json

@@ -1,5 +1,5 @@
 target_ns: paa
-cluster_name: paa
+cluster_name: ciso-scenario
 bundle_id: "{{ cookiecutter.bundle_name }}"
 bundle_title: "{{ cookiecutter.bundle_title }}"
 work_dir: "{{ lookup('env', 'WORK_DIR') | default('/tmp/caa-bench', true) }}"

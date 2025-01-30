@@ -253,27 +253,7 @@ Please refer to [evaluation.py](/ciso/4.upd-cis-b-k8s-kyverno/evaluation.py) for
 │   └── Makefile    # Commands to simplify setup and execution for the scenario
 ```
 
-## Try Benchmark
-1. Start Benchmark Server
-1. Start Benchmark Runner
-1. Create sample-task-scenarios/ciso/scenario-bundles.json
-    ```
-    token=`curl -k -s -X POST \
-        -H "Content-Type: application/x-www-form-urlencoded" \
-        "https://localhost:8000/test/token" \
-        -d "username=service_compliance&password=" | jq -r .access_token`
-    curl -k -X POST \
-        -H "Authorization: Bearer $token" \
-        -H "Content-type: application/json" \
-        "https://localhost:8000/test/registry/setup-scenarios" -d @sample-task-scenarios/ciso/scenario-bundles.json | jq
-    ```
-1. Go to Benchmark UI and create agent with Expert level and all categories selected
-    ![registration](/ciso/images/registration.png)
-
-1. Run Benchmark and finally obtain these 4 scenarios' scores
-    ![registration](/ciso/images/leaderboard.png)
-
-## Usage
+## Try Sample CISO Scenarios with CISO Agent
 
 Each scenario contains Makefile that contains the following targets. Benchmark Runner invokes these targets.
 
@@ -285,7 +265,23 @@ Each scenario contains Makefile that contains the following targets. Benchmark R
 - destroy_bundle: delete the target environment
 - revert_bundle: revert the target environment
 
-### Pre-requisites (verified only on M1 Mac OSX)
+### ⚠ **Disclaimer: This process may modify or delete your environment**
+Running the sample scenarios may modify or delete parts of your environment.  
+- **Kubernetes-related scenarios**:  
+  - `deploy_bundle` **creates a Kind cluster**, and `destroy_bundle` **deletes it**.  
+- **RHEL-related scenarios**:  
+  - Temporarily **adds and removes users** in the target RHEL environment.  
+  - **Modifies system configurations** (e.g., `/etc/ssh/sshd_config`) for fault injection.  
+- **General impact**:
+  - Creates temporary files and directories under `/tmp` on the machine where the commands are executed.
+
+💡 **Please run these commands only in a test environment or sandbox where any changes will not cause issues.**
+
+### 1. Task Scenario for Targeting Kubernetes Cluster with Kyverno
+
+The followings are for `1.gen-cis-b-k8s-kyverno` and `4.upd-cis-b-k8s-kyverno`
+
+#### Pre-requisites (Tested on macOS. Compatibility with other platforms may vary.)
 1. Docker runtime (e.g. [Rancher Desktop](https://docs.rancherdesktop.io/getting-started/installation))
 1. KinD (tested with 0.19.0)
     - For Rancher Desktop use, some older versions don't work with KinD. We have only tested on Rancher 1.16.0.
@@ -303,23 +299,44 @@ Each scenario contains Makefile that contains the following targets. Benchmark R
 1. jq command
     - `brew install jq`
 
-### Run Task Scenario Manually
-1. Go to the directory of a bundle (e.g. `cd 1.gen-cis-b-k8s-kyverno`)
+#### Steps
+1. Go to the directory of a bundle (e.g. `cd 1.gen-cis-b-k8s-kyverno`.)
 1. Create a scenario environment
-    This command creates a Kind Cluster and install Kyverno to the cluster
+    This command creates a Kind Cluster and install Kyverno to the cluster (the cluster name is "scenarios-ciso" as default. You can change it at "cluster_name" in /playbooks/vars.yaml.) It takes few minutes to finish.
     - `make deploy_bundle FOREGROUND=true`
+    
+        e.g.
+        ```
+        $ make deploy_bundle FOREGROUND=true
+        ...
+        TASK [Write updated status (with or without kubeconfig) back to JSON file] ***********************************************
+        changed: [localhost]
+
+        PLAY RECAP ***************************************************************************************************************
+        localhost                  : ok=57   changed=10   unreachable=0    failed=0    skipped=11   rescued=0    ignored=0   
+        ```
+    - The kubconfig is available `/tmp/scenario-ciso-1/kubeconfig.caa.yaml`. The kubeconfig is available at /tmp/scenario-ciso-\<X\>/kubeconfig.caa.yaml, where \<X\> varies depending on the scenario (e.g., 1 for 1.gen-cis-b-k8s-kyverno, 2 for 2.gen-cis-b-k8s-kubectl-opa, etc.)
 1. Inject compliance issues into the environment
     This command deploys nginx that violates the policy to minimize the admission of containers wishing to share the host network namespace. (hostNetwork is set to true)
     - `make inject_fault FOREGROUND=true`
     
+        e.g.
+        ```
+        $ make inject_fault FOREGROUND=true
+        PLAY [Execute fault injection] *******************************************************************************************
+        ...
+        PLAY RECAP ***************************************************************************************************************
+        localhost                  : ok=29   changed=3    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+        ```
     - Now a pod that violates the policy to minimize the admission of containers wishing to share the host network namespace. (hostNetwork is set to true)
         ```
+        $ export KUBECONFIG=/tmp/scenario-ciso-1/kubeconfig.caa.yaml
         $ kubectl get pod -n paa
         NAME                                READY   STATUS    RESTARTS   AGE
-        nginx-deployment-5778696c59-2j7cb   1/1     Running   0          10m
+        nginx-deployment-7cb5b996ff-vb8mz   1/1     Running   0          1m
         ```
         ```
-        $ kubectl get pod -n paa nginx-deployment-5778696c59-2j7cb -o yaml
+        $ kubectl get pod -n paa nginx-deployment-7cb5b996ff-vb8mz -o yaml
           apiVersion: v1
           kind: Pod
           metadata:
@@ -349,7 +366,178 @@ Each scenario contains Makefile that contains the following targets. Benchmark R
       }
     }
     ```
+1. Next, actually run CISO Agent to solve the given goal. To do that, please store the obtained `kubeconfig` from `make get` to a file and also replace the `{{ kubeconfig }}` in the `goal_template`. Note that this process is for the case of CISO Agent. It depends on agent how we prepare the input for an AI Agent. The following steps are example steps for the preparation of the CISO Agent. Please see [CISO Agent Getting started](https://github.ibm.com/project-polaris/ciso-agent) for the details.
+    1. Save the kubeconfig
+        - `mkdir -p /tmp/agent-workspace`
+        - `make get 2>/dev/null | jq -r .vars.kubeconfig > /tmp/agent-workspace/kubeconfig.yaml`
+    1. Replace the `{{ kubeconfig }}` with the saved file path in the `goal_template` when you run CISO Agent.
+        - `make get 2>/dev/null | jq -r .goal_template | sed "s|{{ kubeconfig }}|/tmp/agent-workspace/kubeconfig.yaml|g" > /tmp/agent-workspace/goal.txt`
+    1. Add a directive for working directory.
+        - `echo "You can use '/tmp/agent-workspace' as your workdir." >> /tmp/agent-workspace/goal.txt`
+1. Run the CISO agent (https://github.ibm.com/project-polaris/ciso-agent).
 1. Once your agent is finished, run evaluation.
     - `make evaluate`
-1. Cleanup (delete cluster)
-    - `make destroy_bundle`
+
+        e.g.
+        ```
+        $ make evaluate
+        ansible-playbook ./playbooks/evaluate.yml --extra-vars "path_to_output=/tmp/scenario-ciso-1/evaluation.json " &> /tmp/scenario-ciso-1/evaluate.log
+            {
+            "pass": true,
+            "tasks": {
+                "generate_assessment_posture": true,
+                "generate_policy": false,
+                "evidence_available": false
+            }
+        }       
+        ```
+    - If the `pass` is `true`, the CISO Agent has successfully deployed the correct Kyverno Policy. You can check the Kyverno Policy that the CISO Agent created.
+        ```
+        $ kubectl get clusterpolicy
+        NAME                          ADMISSION   BACKGROUND   READY   AGE     MESSAGE
+        deny-host-network-namespace   true        true         True    5m39s   Ready
+        ```
+    - Also, you can check that Kyverno reports the policy alert based againt the injected fault deployment on this policy.
+        ```
+        $ kubectl get policyreport -n paa
+        NAME                                   KIND         NAME                                PASS   FAIL   WARN   ERROR   SKIP   AGE
+        2f6bbe6e-4f1c-4381-b5c8-b1ff4adb7121   ReplicaSet   nginx-deployment-7cb5b996ff         0      1      0      0       0      6m45s
+        335b8723-9c40-41ce-acc1-5cad0f5bdfb7   Deployment   nginx-deployment                    0      1      0      0       0      6m45s
+        4868fc81-2b55-4981-9bc7-def313f74619   Pod          nginx-deployment-7cb5b996ff-vb8mz   0      1      0      0       0      6m45s
+        ```
+1. Now you successfully finished a single evaluation of the Agent. You can cleanup (delete cluster) or if you want to try again, run `make revert`, which removes fault injections, kyverno resources (policy and policy reports).
+    - `make destroy_bundle FOREGROUND=true` or `make revert FOREGROUND=true`
+
+### 2. Task Scenario for Targeting Kubernetes Cluster with Kubectl+OPA
+
+The followings are for `2.gen-cis-b-k8s-kubectl-opa`
+
+#### Pre-requisites
+Same as [Task Scenario for Targeting Kubernetes Cluster with Kyverno](#task-scenario-for-targeting-kubernetes-cluster-with-kyverno)
+
+#### Steps
+Same as Steps 1-6, as described in [Task Scenario for Targeting Kubernetes Cluster with Kyverno](#task-scenario-for-targeting-kubernetes-cluster-with-kyverno)
+
+The only different step is evaluation. For this step, you need to place the agent output in the directory used for evaluation, as this scenario expects the Agent to generate a script for data collection and an OPA Rego policy for compliance-checking the collected data.
+
+1. Once the Agent has finished, ensure that the Agent output includes playbool.yml and policy.rego.
+    For example, if the Agent outputs the playbook and policy in `/tmp/agent-workspace`
+1. Run evaluation
+    - `make evaluate SHARED_WORKSPACE=/tmp/agent-workspace`
+
+        e.g.
+        ```
+        make evaluate SHARED_WORKSPACE=/tmp/agent-workspac
+
+        {"pass": true, "details": "[fetcher] cmd: ['bash', '/tmp/agent-workspace/fetcher.sh'], stdout: , stderr: \n[checker] cmd: ['opa', 'eval', '--data', '/tmp/agent-workspace/policy.rego', '--input', '/tmp/agent-workspace/collected_data.json', 'data.check.result', '--format', 'raw'], stdout: false, stderr: \n"}
+        ```
+    - If the `pass` is `true`, the CISO Agent has successfully created a script for resource collection from Kubernetes and OPA policy for compliance checking aganst the collected data.
+1. Now you successfully finished a single evaluation of the Agent. You can cleanup (delete cluster) or if you want to try again, run `make revert`, which only removes Kubernetes resources deployed at fault injection.
+    - `make destroy_bundle FOREGROUND=true` or `make revert FOREGROUND=true`
+
+### 3. Task Scenario for Targeting Red Hat Enterprise Linux 9
+
+#### Pre-requisites (Tested on macOS. Compatibility with other platforms may vary.)
+1. [OPA](https://www.openpolicyagent.org/) (tested with v1.0.0)
+1. Ansible Playbook (tested with 2.17.4) and kubernetes.core module
+    - From Homebrew
+        - `brew install ansible`
+    - From PyPI
+        - `pip install ansible` (see also https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#pipx-install)
+        - `ansible-galaxy collection install kubernetes.core`
+        - `pip install jmespath kubernetes`
+1. jq command
+    - `brew install jq`
+1. Red Hat Enterprise Linux 9 with admininistrative access (at least the task scenario needs permission to create a temporal user)
+
+#### Steps
+1. Create input.json
+    Fill in the `target_server.address`, `target_server.username`, and `target_server.sshkey` fields in the `input.json` located in the `3.gen-cis-b-rhel9-ansible-opa` directory.
+1. Create a scenario environment
+    This command creates a temporary user on the target RHEL machine. The default username is `ansible_user`. You can modify the name in the `check_target_user` variable in `playbooks/vars.yaml`.
+    - `make deploy_bundle INPUT_FILE=./input.json FOREGROUND=true`
+    
+        e.g.
+        ```
+        $ make deploy_bundle INPUT_FILE=./input.json FOREGROUND=true
+        ...
+        TASK [Write updated status back to JSON file] ****************************************************************************
+        changed: [RHEL9 Machine -> localhost]
+
+        PLAY RECAP ***************************************************************************************************************
+        RHEL9 Machine              : ok=32   changed=10   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+        ```
+    - The temporary user's credentials and the inventory ini file for running Ansible with the user are located in /tmp/scenario-ciso-3 directory.
+        ```
+        $ ls /tmp/scenario-ciso-3
+        id_rsa.ansible_user   input.json            inventory.ansible.ini status.json
+        ```
+1. Inject compliance issues into the environment
+    This command applies non-compliant settings to the system to simulate compliance issues. Please see [3.gen-cis-b-rhel9-ansible-opa/tasks/fault_inject.yml](/ciso/3.gen-cis-b-rhel9-ansible-opa/tasks/fault_inject.yml) for what is injected.
+    - `make inject_fault INPUT_FILE=./input.json FOREGROUND=true`
+    
+        e.g.
+        ```
+        $ make inject_fault INPUT_FILE=./input.json FOREGROUND=true
+        PLAY [Execute fault injection] *******************************************************************************************
+        ...
+        PLAY RECAP ***************************************************************************************************************
+        RHEL9 Machine              : ok=24   changed=4    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+        ```
+1. Get the goal and invoke your Agent to satisfy the goal
+    ```
+    $ make get INPUT_FILE=./input.json 2>/dev/null
+    {
+    "metadata": {
+        "name": "rhel9/cis-b-gen/5.2.12",
+        "description": "CIS Benchmark for RHEL9 5.2.12",
+        "incident_type": "rhel9-cis-b-gen",
+        "scenario_type": "Gen-CIS-b-RHEL9-Ansible-OPA",
+        "goal": "Ensure SSH X11 forwarding is disabled"
+    },
+    "goal_template": "I would like to check if the following condition is satisfiled, given a host name `rhel9_servers`, on RHEL by using Ansible Playbook and OPA Rego policy\n    Ensure SSH X11 forwarding is disabled \n\nTo check the condition, do the following steps. \n- collect configuration from the RHEL host and save it locally. you can use ansible-playbook to do that. \n- chcek if the condition is met by using rego policy with the input given by the step above. \n\nfor those steps, you need to create ansible playbook `playbook.yml` and OPA rego policy `policy.rego`.\nIf you can fix the generated code, do it and run the fixed code again.\nOnce you get a final answer, you can quit the work.\n\nThe Ansible inventory file (inventory.ansible.ini) for the target RHEL server is located at `{{ path_to_inventory }}`.\n",
+    "vars": {
+        "ansible_ini": "[rhel9_servers]\nrhel9 ansible_host=\"ciso-server1.sl.cloud9.ibm.com\" ansible_user=\"ansible_user\" ansible_ssh_private_key_file=\"/tmp/scenario-ciso-3/id_rsa.ansible_user\" ansible_python_interpreter=\"/usr/bin/python3\"",
+        "ansible_user_key": "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn\nNhAAAAAwEA
+        ...}
+    }
+    ```
+1. Next, actually run CISO Agent to solve the given goal. To do that:
+    1. Retrieve the ansible.ini file and the ansible_user_key.
+        - `mkdir -p /tmp/agent-workspace`
+        - `make get INPUT_FILE=./input.json 2>/dev/null | jq -r .vars.ansible_ini > /tmp/agent-workspace/ansible.ini`
+1. Run the CISO agent (https://github.ibm.com/project-polaris/ciso-agent) by providing goal description obtained from `make get` with replaced `{{ path_to_inventory }}` with the ansible.ini (e.g. `/tmp/agent-workspace/ansible.ini`). 
+1. Once the Agent has finished, ensure that the Agent output includes playbool.yml and policy.rego.
+    For example, if the Agent outputs the playbook and policy in `/tmp/agent-workspace`
+1. Run evaluation
+    - `make evaluate INPUT_FILE=./input.json SHARED_WORKSPACE=/tmp/agent-workspace`
+
+        e.g.
+        ```
+        make evaluate INPUT_FILE=./input.json SHARED_WORKSPACE=/tmp/agent-workspac
+        {"pass": true, "details": "[fetcher] cmd: ['ansible-playbook', '/tmp/agent-workspace/playbook.yml', '-i', '/tmp/scenario-ciso-3/inventory.ansible.ini'], stdout: \nPLAY [Collect SSH configuration from RHEL host] ********************************\n\nTASK [Gathering Facts] *********************************************************\nok: [rhel9]\n\nTASK [Check if SSH X11 forwarding is disabled] *********************************\nchanged: [rhel9]\n\nTASK [Save SSH X11 forwarding configuration to a variable] *********************\nok: [rhel9]\n\nTASK [Save the collected data in a localhost] **********************************\nok: [rhel9 -> localhost]\n\nPLAY RECAP *********************************************************************\nrhel9                      : ok=4    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   , stderr: \n[checker] cmd: ['opa', 'eval', '--data', '/tmp/agent-workspace/policy.rego', '--input', '/tmp/agent-workspace/collected_data.json', 'data.check.result', '--format', 'raw'], stdout: false, stderr: \n"}
+        ```
+    - If the `pass` is `true`, the CISO Agent has successfully created playbook for status collection and OPA policy for compliance checking aganst the collected data.
+1. Now you successfully run a single evaluation of the Agent. You can revert the injected fault configuration and remove the temporal users
+    - `make destroy_bundle INPUT_FILE=./my.input.json FOREGROUND=true`
+
+
+## Try Benchmark
+1. Start Benchmark Server
+1. Start Benchmark Runner
+1. Create sample-task-scenarios/ciso/scenario-bundles.json
+    ```
+    token=`curl -k -s -X POST \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        "https://localhost:8000/test/token" \
+        -d "username=service_compliance&password=" | jq -r .access_token`
+    curl -k -X POST \
+        -H "Authorization: Bearer $token" \
+        -H "Content-type: application/json" \
+        "https://localhost:8000/test/registry/setup-scenarios" -d @sample-task-scenarios/ciso/scenario-bundles.json | jq
+    ```
+1. Go to Benchmark UI and create agent with Expert level and all categories selected
+    ![registration](/ciso/images/registration.png)
+
+1. Run Benchmark and finally obtain these 4 scenarios' scores
+    ![registration](/ciso/images/leaderboard.png)
