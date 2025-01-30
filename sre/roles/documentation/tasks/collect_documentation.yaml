@@ -22,10 +22,22 @@
   tags:
     - single_doc_validate
 
+- name: Sort incidents
+  set_fact:
+    sorted_incidents: "{{ sorted_incidents | default([]) \
+                          + [all_incidents[lookup('ansible.utils.index_of', data=all_incidents, test='eq', key='id', value=curr_id)]] }}"
+  loop: "{{ sorted_id_values }}"
+  loop_control:
+    loop_var: curr_id
+  vars:
+    all_id_values: "{{ all_incidents | map(attribute='id') | map('int') }}"
+    sorted_id_values: "{{ all_id_values | sort }}"
+  tags:
+    - documentation
 
-- name: Display the collected documentation
-  debug:
-    msg: "all_incidents = {{ all_incidents | to_json }}"
+- name: Replace all_incidents with sorted list
+  set_fact:
+    all_incidents: "{{ sorted_incidents }}"
   tags:
     - documentation
 

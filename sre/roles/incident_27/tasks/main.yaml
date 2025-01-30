@@ -1,4 +1,9 @@
 ---
+- name: Documenting Incident #27
+  set_fact:
+    all_incidents: "{{ all_incidents + [ docs_incident_27 ] }}"
+  tags: documentation, incident_27
+
 - name: fault_injection_incident_27
   ansible.builtin.import_role:
     name: fault_injection
