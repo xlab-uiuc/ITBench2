@@ -6,9 +6,34 @@
 # Setup
 
 ## Local Cluster
-This setup has been tested on Fedora.
+This setup has been tested on MacOS.
 
-### Install kind
+Helm version v.3.16 is required: [Installation](https://helm.sh/docs/intro/install/).
+
+#### Create an islated environment 
+##### e.g., using Miniconda / Anaconda
+
+```bash
+conda create -n srebench python=3.11
+conda activate srebench
+pip install --user ansible
+```
+
+#### Install Python dependencies
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+#### Install podman
+Tested on Podman Desktop. [Installation Instructions can be found here](https://podman.io/docs/installation)
+
+And verify the installation:
+```shell
+podman info
+```
+
+#### Install kind
 ```shell
 # Based on https://kind.sigs.k8s.io/docs/user/quick-start#installing-from-release-binaries
 # For AMD64 / x86_64

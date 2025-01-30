@@ -4,3 +4,80 @@ sample_application: dsb_hotel_reservation
 
 target_namespace_name: "{{ deathstarbench_hotelreservation_app_namespace_project_name }}"
 target_deployment_name: "search"
+
+docs_incident_102:
+  platform: kubernetes
+  dsl_format: groups
+  id: 102
+  name: ''
+  description: ''
+  application: "deathstarbench_hotel_reservations"
+  complexity: Low
+  inject_fault_unused: true
+  agent_operation_timeout_sec: 3000
+  golden_signal_cause: resource unavailability
+  golden_signal_effect: error
+  incidentPattern: MemoryResourceLimit
+  fault:
+    - entity:
+        name: search-pod-1
+        group_id: search-pod-1
+        kind: Pod
+      condition: "To Be Specified"
+      category: "Other"
+      fault_mechanism: custom
+  technologies:
+  - Go
+  - Node.js
+  alerts:
+  - id: Error_Rate_is_Above_Threshold_frontend
+    text: Error Rate is Above Threshold
+    location:
+      name: frontend
+      namespace: hotel-reservations
+      kind: Service
+  groups:
+  - id: search-namespace
+    kind: Namespace
+    name: hotel-reservations
+    namespace: ""
+    root_cause: true
+  - id: search-service-1
+    kind: Service
+    filter: 
+    - .*search-.*
+    namespace: hotel-reservations
+  - id: search-deployment-1
+    kind: Deployment
+    filter: 
+    - .*search-.*
+    namespace: hotel-reservations
+  - id: frontend-service-1
+    kind: Service
+    filter: 
+    - .*frontend-.*
+    namespace: hotel-reservations
+  - id: frontend-pod
+    kind: Pod
+    namespace: hotel-reservations
+    filter:
+    - .*frontend-.*
+  aliases:
+  - - search-deployment-1
+    - search-service-1
+  - - frontend-service-1
+    - frontend-pod
+  propagations:
+  - source: search-namespace
+    target: search-service-1
+    condition: searchservice replicaset has 0 pods
+    effect: searchservice Error Rate is Above Threshold
+  - source: search-service-1
+    target: frontend-service-1
+    condition: searchservice Error Rate is Above Threshold
+    effect: frontend service Error Rate is Above Threshold
+  recommended_actions:
+  - solution:
+      id: increase_memory_resource_limit
+      actions:
+      - increase memory resource limit
