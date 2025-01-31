@@ -1,66 +1,102 @@
-# How to use KinD cluster for scenario environment
+# How to use AWS EKS cluster for scenario environment
 
-When using a KinD cluster for the scenario environment, some additional configurations are required.
+When using an AWS EKS cluster for the scenario environment, some additional configurations are required.
 
 ## Key Points
-- By default, a KinD cluster's kubeconfig file uses `127.0.0.1` as its API endpoint.
-- This address is not accessible from the scenario container.
-- You need to edit the kubeconfig file by the following steps to allow the container to access your KinD cluster.
+- By default, an EKS cluster's kubeconfig file uses `aws` command which requires aws credentials.
+- Those credentials are not available in the scenario container.
+- You need to get a token by running the command manually and edit the kubeconfig file to use it by the following steps to access your EKS cluster.
 
 ## Steps
 
 ### 1. Obtain a Kubeconfig File
 
-First, retrieve the kubeconfig file for your KinD cluster using the following command:
+First, retrieve the kubeconfig file for your EKS cluster using the following command:
 
 ```bash
-$ kind get kubeconfig --name <CLUSTER_NAME> > ./kubeconfig.yaml
+$ aws eks update-kubeconfig --region <AWS_REGION> --name <CLUSTER_NAME>
+Added new context arn:aws:eks:(...):cluster/<CLUSTER_NAME> to /Users/<USERNAME>/.kube/config
 ```
 
-Replace <CLUSTER_NAME> with the actual name of your cluster. You can find the correct name by running:
- 
+Replace <CLUSTER_NAME> and <AWS_REGION> with the actual values for your cluster. 
+
+Then copy the kubeconfig file to edit.
+
 ```bash
-$ kind get clusters
+$ cp ~/.kube/config ./kubeconfig.yaml
 ```
 
-### 2. Edit the Kubeconfig file
+### 2. Run the command to get token
 
-```
-$ vim ./kubeconfig.yaml
-```
-
-The kubeconfig file should look like this:
+The obtained kubeconfig file should look like this:
 
 ```yaml
 apiVersion: v1
 clusters:
-- cluster:
-    certificate-authority-data: LS0t ... LS0K
-    server: https://127.0.0.1:<PORT_NUMBER>
-  name: kind-<CLUSTER_NAME>
-...
+  ...
+kind: Config
+preferences: {}
+users:
+- name: arn:aws:eks:(...):cluster/<CLUSTER_NAME>
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args:
+      - --region
+      - <AWS_REGION>
+      - eks
+      - get-token
+      - --cluster-name
+      - <CLUSTER_NAME>
+      - --output
+      - json
+      command: aws
 ```
+
+Then, you can manually get token for this cluster by the following command:
+
+```bash
+$ aws --region <AWS_REGION> eks get-token --cluster-name <CLUSTER_NAME> --output json
+{
+    "kind": "ExecCredential",
+    "apiVersion": "client.authentication.k8s.io/v1beta1",
+    "spec": {},
+    "status": {
+        "expirationTimestamp": "2025-01-31T09:15:30Z",
+        "token": "k8s-aws-v1.a ... Y"
+    }
+}
+```
+
+In the response json, you can find `token` field. This is the token which you will put into the kubeconfig file.
+
+**NOTE**: This token expires in 15 minutes, so if you takes more than 15 minutes during scenario operations, please renew the token.
 
 Modify the following:
 
-1. Replace `127.0.0.1` with `host.docker.internal`. This address is accessible from the scenario container.
-1. Remove the line containing `certificate-authority-data`:.
-1. Add `insecure-skip-tls-verify: true` instead.
+1. Remove the `exec` field under `user` in the kubeconfig file.
+1. Add a `token` field under `user` instead.
+1. Set the token you just obtained to the `token` field.
 
 The final version of your kubeconfig file should look like this:
 
+```bash
+$ vim ./kubeconfig.yaml
+```
 
 ```yaml
 apiVersion: v1
 clusters:
-- cluster:
-    server: https://host.docker.internal:<PORT_NUMBER>
-    insecure-skip-tls-verify: true
-  name: kind-<CLUSTER_NAME>
-...
+  ...
+kind: Config
+preferences: {}
+users:
+- name: arn:aws:eks:(...):cluster/<CLUSTER_NAME>
+  user:
+    token: k8s-aws-v1.a ... Y
 ```
 
-Ensure that you retain the original values for `<PORT_NUMBER>` and `<CLUSTER_NAME>`.
+Ensure that you retain the original values for `clusters` and `contexts`. What you need to change is only `user` part.
 
-Now, you are ready to use your KinD cluster!
+Now, you are ready to use your AWS EKS cluster!
 Place this kubeconfig file in your workding directory.
