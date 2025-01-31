@@ -73,7 +73,7 @@
   when: is_native and is_injection
 
 - name: Kubectl restart Flagd deployment
-  ansible.builtin.shell: KUBECONFIG={{ kubeconfig }} kubectl -n "{{ otel_astronomy_app_installation_name }}-flagd-config"
+  ansible.builtin.shell: KUBECONFIG={{ kubeconfig }} kubectl -n "{{ otel_astronomy_app_namespace_project_name }}" rollout restart deployment "{{ otel_astronomy_app_installation_name }}-flagd"
   register: flagd_deployment_restart_output
   when: is_native and is_injection
 
