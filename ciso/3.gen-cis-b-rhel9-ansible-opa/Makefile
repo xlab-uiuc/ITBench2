@@ -11,7 +11,7 @@ help:
 	@echo "Option INPUT_FILE=<path to bundle input file>"
 	@echo "help   - Display this help information"
 
-export WORK_DIR = /tmp/scenario-ciso-3
+export WORK_DIR = /tmp/agent
 
 INPUT_FILE ?=
 DEFAULT_INPUT_FILE := input.json
@@ -69,7 +69,7 @@ revert: prepare_directory
 
 evaluate: prepare_directory
 	@echo $$BUNDLE_INPUT_FILE
-	@$(MAKE) run_playbook BG="" REDIRECT="" LOG_FILE=evaluate.log PLAYBOOK=evaluate.yml EXTRA_VARS="--extra-vars \"path_to_output=$(WORK_DIR)/evaluation.json shared_workspace=$(SHARED_WORKSPACE)\"" 1>&2; \
+	@$(MAKE) run_playbook BG="" REDIRECT="" LOG_FILE=evaluate.log PLAYBOOK=evaluate.yml EXTRA_VARS="--extra-vars \"path_to_output=$(WORK_DIR)/evaluation.json \"" 1>&2; \
 	cat $(WORK_DIR)/evaluation.json
 
 run_playbook: EXTRA_VARS ?=

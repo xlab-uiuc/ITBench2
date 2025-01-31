@@ -23,6 +23,7 @@ Replace <CLUSTER_NAME> and <AWS_REGION> with the actual values for your cluster.
 Then copy the kubeconfig file to edit.
 
 ```bash
+$ kubectl config view --minify --raw > ./kubeconfig.yaml
 $ cp ~/.kube/config ./kubeconfig.yaml
 ```
 

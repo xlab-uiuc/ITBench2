@@ -10,7 +10,7 @@ help:
 	@echo "Option FOREGROUND=true for synchronous execution. Default execute as background job."
 	@echo "help   - Display this help information"
 
-export WORK_DIR = /tmp/scenario-ciso-1
+export WORK_DIR = /tmp/scenario
 
 INPUT_FILE ?=
 DEFAULT_INPUT_FILE := input.json
