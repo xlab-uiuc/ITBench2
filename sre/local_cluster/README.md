@@ -36,19 +36,15 @@ podman info
 
 #### Install kind
 ```shell
-# Based on https://kind.sigs.k8s.io/docs/user/quick-start#installing-from-release-binaries
-# For AMD64 / x86_64
-[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
-chmod +x ./kind
-mv ./kind ~/bin/
+brew install kind
 ```
 
 And verify the installation:
 ```shell
-$ which kind
-/usr/local/bin/kind
-$ kind version
-kind v0.23.0 go1.21.10 linux/amd64
+% which kind
+/opt/homebrew/bin/kind
+% kind version
+kind v0.26.0 go1.23.4 darwin/arm64
 ```
 
 A barebone kind configuration file has been provided [here](./kind-config.yaml).
