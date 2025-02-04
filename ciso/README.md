@@ -20,15 +20,15 @@ For the detailed design, please refer to [IT-Bench Design Doc](https://github.ib
 ## Table of Contents
 
 1. [Scenarios](#scenarios)
-   - [1. gen-cis-b-k8s-kyverno](#1-gen-cis-b-k8s-kyverno)
-   - [2. gen-cis-b-k8s-kubectl-opa](#2-gen-cis-b-k8s-kubectl-opa)
-   - [3. gen-cis-b-rhel9-ansible-opa](#3-gen-cis-b-rhel9-ansible-opa)
-   - [4. upd-cis-b-k8s-kyverno](#4-upd-cis-b-k8s-kyverno)
-2. [Try Sample CISO Scenarios with CISO Agent](#try-sample-ciso-scenarios-with-ciso-agent)
-   - [1. Build the Task Scenarios Docker Image](#1-build-the-task-scenarios-docker-image)
-   - [2. Running `make` Commands Using the Docker Image](#2-running-make-commands-using-the-docker-image)
-   - [3a. Task Scenario for Targeting a Kubernetes Cluster](#3a-task-scenario-for-targeting-a-kubernetes-cluster)
-   - [3b. Task Scenario for Targeting Red Hat Enterprise Linux 9](#3b-task-scenario-for-targeting-red-hat-enterprise-linux-9)
+    - [1. gen-cis-b-k8s-kyverno](#1-gen-cis-b-k8s-kyverno)
+    - [2. gen-cis-b-k8s-kubectl-opa](#2-gen-cis-b-k8s-kubectl-opa)
+    - [3. gen-cis-b-rhel9-ansible-opa](#3-gen-cis-b-rhel9-ansible-opa)
+    - [4. upd-cis-b-k8s-kyverno](#4-upd-cis-b-k8s-kyverno)
+2. [Manual Benchmarking Process for the CISO Task Scenario](#manual-benchmarking-process-for-the-ciso-task-scenario)
+    - [1. Outline](#1-outline)
+    - [2. Prerequisites](#2-prerequisites)
+    - [3a. Task Scenario for Targeting a Kubernetes Cluster](#3a-task-scenario-for-targeting-kubernetes-cluster)
+    - [3b. Task Scenario for Targeting Red Hat Enterprise Linux 9](#3b-task-scenario-for-targeting-red-hat-enterprise-linux-9)
 
 ## Scenarios
 
@@ -266,64 +266,87 @@ Please refer to [evaluation.py](/ciso/4.upd-cis-b-k8s-kyverno/evaluation.py) for
 │   └── Makefile    # Commands to simplify setup and execution for the scenario
 ```
 
-## Try Sample CISO Scenarios with CISO Agent
+## Manual Benchmarking Process for the CISO Task Scenario
+In this process, you will prepare a base environment, configure it to intentionally violate compliance requirements, run the Agent to address these issues, and evaluate the results.
 
-In these sample scenarios, you will benchmark the CISO Agent using a pre-configured Kubernetes cluster or RHEL machine.
-The setup for the benchmark scenario and its evaluation can be executed using the `make` targets listed below.
+**Important: Perform all steps in a secure, non-production environment to prevent any impact on live systems, as the process involves configuring the environment to intentionally violate compliance requirements.**
 
-Since the setup process involves creating temporary users and applying various configurations that violate compliance requirements, **ensure that the Kubernetes cluster or RHEL machine used is a test or sandbox environment. Do not use production systems.**
+### 1. Outline
 
-Makefile targets for task scenarios.
+![Outline](/ciso//images/overview-step.png)
 
-- deploy_bundle: setup the target environment
-- inject_fault: deploy or configure the target environment so it violates the compliance requirement
-- get: get the scenario details that would be passed as the input for Agent
-- evaluate: valuate
-- get_status: get status
-- revert_bundle: revert the target environment
-- destroy_bundle: delete the target environment
+1. Prepare a target environment for benchmarking your Agent based on the CISO Scenario
+    - Since the scenario configuration process involves creating temporary users and applying various configurations that violate compliance requirements, **ensure that the Kubernetes cluster or RHEL machine used is a test or sandbox environment. Do not use production systems.**
+1. Configure the environment to violate the provided compliance requirements.
+1. Provide the required information (task goal, credentials, etc.) to the Agent once the environment setup is complete.
+1. Run the Agent to complete the task.
+1. Evaluate the target environment to verify if the task was properly completed after the Agent has finished.
+1. Clean up the environment to restore it to its original state.
 
-These `make` commands are executed inside a Docker container. Therefore, you must first build the required Docker image.
+### 2. Prerequisites
 
-### 1. Build Task Scenarios Docker Image
-```
-cd ciso
-docker build . -f Dockerfile -t ciso-task-scenarios:latest
-```
+Before starting the task scenario, ensure that all necessary tools and environments are set up correctly to maintain security and stability throughout the process.
 
-### 2. Running `make` Commands Using the Docker Image
+1. Build a Docker Image for the Task Scenario Makefile Runner Securely
+
+    **To execute the task scenario in a controlled and secure manner, build the Docker image for the Makefile runner using the following steps. This ensures that the environment is isolated and minimizes security risks during the execution of compliance-related tasks.**
+
+    ```
+    cd ciso
+    docker build . -f Dockerfile -t ciso-task-scenarios:latest
+    ```
+
+2. Use the following syntax to invoke a `make` command via the Docker image:
+
+    ```
+    docker run --rm -ti --name ciso-task-scenario \
+        -v <PATH/TO/SCENARIO_WORKDIR>:/tmp/scenario \
+        -v <PATH/TO/AGENT_WORKDIR>:/tmp/agent\
+        -v <PATH/TO/KUBECONFIG>:/etc/ciso-task-scenarios/kubeconfig.yaml \
+        ciso-task-scenarios:latest \
+        make -C <scenario directory name (e.g. 1.gen-cis-b-k8s-kyverno)> \
+        <make target (e.g. deploy_bundle)>
+    ```
+
+    **Notes on Input Values**
+    - Replace `<PATH/TO/SCENARIO_WORKDIR>` with the actual path for your workdir for scenario
+    - Replace `<PATH/TO/AGENT_WORKDIR>` with the actual path for your workdir for agent, which must be consistent with the `<PATH/TO/WORKDIR>` used in [ciso-agent](https://github.ibm.com/project-polaris/ciso-agent).
+    - Replace `<PATH/TO/KUBECONFIG>` with the actual path for your kubeconfig file
 
 
-Use the following syntax to invoke a `make` command via the Docker image:
+    Makefile targets for task scenarios.
 
-```
-docker run --rm -ti --name ciso-task-scenario \
-    -v <PATH/TO/SCENARIO_WORKDIR>:/tmp/scenario \
-    -v <PATH/TO/AGENT_WORKDIR>:/tmp/agent\
-    -v <PATH/TO/KUBECONFIG>:/etc/ciso-task-scenarios/kubeconfig.yaml \
-    ciso-task-scenarios:latest \
-    make -C <scenario directory name (e.g. 1.gen-cis-b-k8s-kyverno)> \
-    <make target (e.g. deploy_bundle)>
-```
-
-**Notes on Input Values**
-- Replace `<PATH/TO/SCENARIO_WORKDIR>` with the actual path for your workdir for scenario
-- Replace `<PATH/TO/AGENT_WORKDIR>` with the actual path for your workdir for agent, which must be consistent with the `<PATH/TO/WORKDIR>` used in [ciso-agent](https://github.ibm.com/project-polaris/ciso-agent).
-- Replace `<PATH/TO/KUBECONFIG>` with the actual path for your kubeconfig file
+    - deploy_bundle: setup the target environment
+    - inject_fault: deploy or configure the target environment so it violates the compliance requirement
+    - get: get the scenario details that would be passed as the input for Agent
+    - evaluate: valuate
+    - get_status: get status
+    - revert_bundle: revert the target environment
+    - destroy_bundle: delete the target environment
 
 ### 3a. Task Scenario for Targeting Kubernetes Cluster
 
-The following steps apply to the scenario directory names:
+The following steps apply to the scenario targting Kubernetes Cluster. The corresponding `<scenario directory name>` values are as follows:
 - 1.gen-cis-b-k8s-kyverno
 - 2.gen-cis-b-k8s-kubectl-opa
 - 4.upd-cis-b-k8s-kyvern
 
 The example below demonstrates the steps for `1.gen-cis-b-k8s-kyverno`. When trying other scenarios, replace `<scenario directory name>` accordingly.
 
-#### Steps
+#### Prerequisites
 1. Prepare kubeconfig file for Kubernetes cluster used this benchmark
     - For Kind, [prepare-kubeconfig-kind.md](/ciso/prepare-kubeconfig-kind.md)
     - For EKS, [prepare-kubeconfig-eks.md](/ciso/prepare-kubeconfig-eks.md)
+1. Prepare two working directories to be mounted by the Docker container
+    - One directory will be used for the Task Scenario (referenced as `<PATH/TO/SCENARIO_WORKDIR>` in later steps). 
+    - The other will be used for the Agent (referenced as `<PATH/TO/AGENT_WORKDIR>`). 
+   
+    **These directories will be actively accessed during the benchmark, so make sure to use directories that are safe to modify.**
+    - Examples:
+        - `/tmp/ciso-scenario` for `<PATH/TO/SCENARIO_WORKDIR>`
+        - `/tmp/ciso-agent` for `<PATH/TO/AGENT_WORKDIR>`
+
+#### Steps
 1. Setup a scenario environment against the Kubernetes cluster. 
     This command installs Kyverno to the provided kubeconfig.yaml cluster. It takes few minutes to finish.
 
@@ -417,7 +440,8 @@ The example below demonstrates the steps for `1.gen-cis-b-k8s-kyverno`. When try
 
     The cluster's kubeconfig is at `{{ kubeconfig }}`.
     ```
-1. Run the CISO agent (https://github.ibm.com/project-polaris/ciso-agent).
+1. Run your Agent with the goal description to achieve the objective. You can also use the CISO agent (https://github.ibm.com/project-polaris/ciso-agent) as an example.
+    - For the scenario [2.gen-cis-b-k8s-kubectl-opa](#2-gen-cis-b-k8s-kubectl-opa), the goal requires the Agent to submit generated policy and scripts. In that case, please place the Agent's output files in `<PATH/TO/AGENT_WORKDIR>` (The CISO agent is already configured to place its output files in this directory by adding a single sentence `You can use "/tmp/agent" as your workdir."`. See [ciso-agent#4-start-the-agent](https://github.ibm.com/project-polaris/ciso-agent?tab=readme-ov-file#4-start-the-agent) for the details.) These files will be used in the next step, "Evaluation".
 1. Once your agent is finished, run evaluation.
     ```
     docker run --rm -ti --name ciso-task-scenario \
@@ -483,16 +507,23 @@ The example below demonstrates the steps for `1.gen-cis-b-k8s-kyverno`. When try
 
 ### 3b. Task Scenario for Targeting Red Hat Enterprise Linux 9
 
+#### Prerequisites
 1. Prepare a Red Hat Enterprise Linux 9 machine with administrative access
     - The task scenario requires permission to create a temporary user.
-1. Create `input.json` by referring to [3.gen-cis-b-rhel9-ansible-opa/input.json](/ciso/3.gen-cis-b-rhel9-ansible-opa/input.json)
+1. The access information to the RHEL machine is passed through json file so please create `input.json` by referring to [3.gen-cis-b-rhel9-ansible-opa/input.json](/ciso/3.gen-cis-b-rhel9-ansible-opa/input.json)
     - Fill in the following fields:
         - `<IP address or hostname of the RHEL9 machine>`
         - `<Username to access the RHEL9 machine>`
     - Save the completed `input.json` in a designated location (e.g., /tmp/input.json). 
-1. Prepare SSH Key to access the RHEL machine 
+1. Prepare SSH Key to access the RHEL machine
+1. Prepare working directories to be mounted by the Docker container
+    These directories will be actively accessed during the benchmark, so make sure to use directories that are safe to modify.
+    - For example: /tmp/ciso-agent for `<PATH/TO/AGENT_WORKDIR>` 
+    - Unlike to [3a. Task Scenario for Targeting Kubernetes Cluster](#3a-task-scenario-for-targeting-kubernetes-cluster), `<PATH/TO/SCENARIO_WORKDIR>` is not required.
+
+#### Steps
 1. Setup a scenario environment
-    The following command creates a temporal user for the scenario. It takes few minutes to finish. (Replace `<PPATH/TO/INPUT_JSON>` and `<PATH/TO/SSHKEY>` with the path input.json and the ssh key. For RHEL case, `<PATH/TO/SCENARIO_WORKDIR>` is not required.)
+    The following command creates a temporal user for the scenario. It takes few minutes to finish. (Replace `<PPATH/TO/INPUT_JSON>` and `<PATH/TO/SSHKEY>` with the path input.json and the ssh key.)
 
     ```
     docker run --rm -ti --name ciso-task-scenario \
@@ -573,18 +604,20 @@ The example below demonstrates the steps for `1.gen-cis-b-k8s-kyverno`. When try
 
     The Ansible inventory file (inventory.ansible.ini) for the target RHEL server is located at `{{ path_to_inventory }}`.
     ```
-1. Run the CISO agent (https://github.ibm.com/project-polaris/ciso-agent).
-    - Replace `{{ path_to_inventory }}` with `/tmp/agent/inventory.anible.ini`
-    - Add on sentence "You can use `/tmp/agent\` as your workdir."
-    ```
-    docker run --rm -ti --name ciso-agent \
-        -v <PATH/TO/AGENT_WORKDIR>:/tmp/agent \
-        -v /Users/yana/git/trl/study/agentic/ciso-agent-sample/.env:/etc/ciso-agent/.env \
-        ciso-agent:latest \
-        python src/ciso_agent/main.py \
-        --goal "$(cat /tmp/goal.txt)" \
-        --auto-approve
-    ```
+1. Run your Agent with the goal description to achieve the objective. You can also use the CISO agent (https://github.ibm.com/project-polaris/ciso-agent) as an example.
+    - Please place `playbook.yml` and `policy.rego` in `<PATH/TO/AGENT_WORKDIR>` (The CISO agent is already configured to place its output files in this directory by adding a single sentence `You can use "/tmp/agent" as your workdir."`. See [ciso-agent#4-start-the-agent](https://github.ibm.com/project-polaris/ciso-agent?tab=readme-ov-file#4-start-the-agent) for the details.) These files will be used in the next step, "Evaluation".
+    1. To run the CISO agent (https://github.ibm.com/project-polaris/ciso-agent).
+        - Replace `{{ path_to_inventory }}` with `/tmp/agent/inventory.anible.ini` in the above goal description.
+        - Add on sentence "You can use `/tmp/agent\` as your workdir."
+        ```
+        docker run --rm -ti --name ciso-agent \
+            -v <PATH/TO/AGENT_WORKDIR>:/tmp/agent \
+            -v /Users/yana/git/trl/study/agentic/ciso-agent-sample/.env:/etc/ciso-agent/.env \
+            ciso-agent:latest \
+            python src/ciso_agent/main.py \
+            --goal "$(cat /tmp/goal.txt)" \
+            --auto-approve
+        ```
 1. Once your agent is finished, run evaluation.
     ```
     docker run --rm -ti --name ciso-task-scenario \
