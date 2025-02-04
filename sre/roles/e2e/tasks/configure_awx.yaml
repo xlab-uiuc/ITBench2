@@ -33,7 +33,7 @@
 
 - name: Set `controller_password` value for the Ansible tower
   set_fact:
-    controller_password: "{{ awx_secret_information.resources[0].data.password | b64decode }}"
+    controller_password: "{{ awx_secret_information.resources[0].data.password | b64decode }}" # pragma: allowlist secret
   tags:
     - awx_configuration
 
@@ -42,7 +42,7 @@
     # (Hack): As the value set using set_fact controller_host is not picked up
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: Kubeconfig
     description: Credentials type for Kubeconfig
     kind: cloud
@@ -58,7 +58,7 @@
     # (Hack): As the value set using set_fact controller_host is not picked up
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: Credential-GitHub-IT-Automation-Bench
     description: Credential-GitHub-IT-Automation-Bench
     organization: Default
@@ -75,7 +75,7 @@
     # (Hack): As the value set using set_fact controller_host is not picked up
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: Project-GitHub-IT-Automation-Bench
     description: Project-GitHub-IT-Automation-Bench
     organization: Default
@@ -96,7 +96,7 @@
     # (Hack): As the value set using set_fact controller_host is not picked up
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: Credential-GitHub-Lumyn
     description: Credential-GitHub-Lumyn
     organization: Default
@@ -113,7 +113,7 @@
     # (Hack): As the value set using set_fact controller_host is not picked up
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: Project-GitHub-Lumyn
     description: Project-GitHub-Lumyn
     organization: Default
@@ -134,7 +134,8 @@
    # (Hack): As the value set using set_fact controller_host is not picked up
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
+
     name: AWX-EE-Custom
     description: AWX-EE-Custom
     organization: Default
@@ -148,7 +149,7 @@
     # (Hack): As the value set using set_fact controller_host is not picked up
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: Credential-AWX
     description: Credential-AWX
     organization: Default
@@ -156,7 +157,7 @@
     inputs:
       host: "{{ controller_host }}"
       username: "{{ controller_username }}"
-      password: "{{ controller_password }}"
+      password: "{{ controller_password }}" # pragma: allowlist secret
       # ToDo: Set based on an upstream configuration variable
       verify_ssl: false
     state: "{{ state }}"
@@ -168,14 +169,14 @@
     # (Hack): As the value set using set_fact controller_host is not picked up
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: Credential-AWS
     description: Credential-AWS
     organization: Default
     credential_type: Amazon Web Services
     inputs:
       username: "{{ aws['access_key_id'] }}"
-      password: "{{ aws['secret_access_key'] }}"
+      password: "{{ aws['secret_access_key'] }}" # pragma: allowlist secret
     state: "{{ state }}"
   tags:
     - awx_configuration

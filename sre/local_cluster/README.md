@@ -10,7 +10,7 @@ This setup has been tested on MacOS.
 
 Helm version v.3.16 is required: [Installation](https://helm.sh/docs/intro/install/).
 
-#### Create an islated environment 
+#### Create an isolated environment 
 ##### e.g., Python's virtual environments
 
 ```bash
@@ -29,9 +29,24 @@ python -m pip install -r requirements.txt
 #### Install podman
 Tested on Podman Desktop. [Installation Instructions can be found here](https://podman.io/docs/installation)
 
-And verify the installation:
+##### Step 1: Initialize Podman Machine
+
 ```shell
-podman info
+podman machine init
+```
+This creates a machine named `podman-machine-default`.
+
+##### Step 2: Upgrade Podman Machine Resources
+
+```shell
+podman machine set --cpus 12 -m 16384
+```
+The deployment was tested with 12 CPU cores and 16 GB of RAM. 
+
+##### Step 3: Start Podman Machine
+
+```shell
+podman machine start
 ```
 
 #### Install kind
@@ -51,7 +66,7 @@ A barebone kind configuration file has been provided [here](./kind-config.yaml).
 
 Let's create a kind cluster using the configuration file by executing:
 ```shell
-$ kind create cluster --config local_cluster/kind-config.yaml
+$ kind create cluster --config kind-config.yaml
 Creating cluster "kind-cluster" ...
  ✓ Ensuring node image (kindest/node:v1.30.0) 🖼
  ✓ Preparing nodes 📦
@@ -62,14 +77,14 @@ Creating cluster "kind-cluster" ...
 Set kubectl context to "kind-cluster"
 You can now use your cluster with:
 
-kubectl cluster-info --context kind-cluster
+kubectl cluster-info --context kind-kind-cluster
 
 Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
 ```
 
 Let's verify the status of the clusters with:
 ```shell
-$ kubectl cluster-info --context kind-cluster
+$ kubectl cluster-info --context kind-kind-cluster
 
 Kubernetes control plane is running at https://127.0.0.1:36111
 CoreDNS is running at https://127.0.0.1:36111/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
@@ -82,16 +97,39 @@ NAME                           STATUS   ROLES           AGE     VERSION\
 kind-cluster-control-plane   Ready    control-plane   8m22s   v1.30.0
 ```
 
+####  Check Alerts using Grafana Dashboard UI
+
+##### Step 1: Port-forward the ingress-nginx service
+
+```shell
+kubectl port-forward svc/ingress-nginx-controller -n ingress-nginx 3000:80
+```
+
+This will forward port **3000** on your localhost to **80** on the **ingress-nginx-controller** service, which exposes the Grafana UI.
+
+
+##### Step 2: Access Grafana Dashboard
+Once the port-forwarding is set up, open a web browser and navigate to:
+
+```
+http://localhost:3000/prometheus/
+```
+
+##### Step 3: Check Alerts in Grafana
+
+Navigate to **Alert Rules** in the left sidebar to check for triggered alerts. 
+
+
 # Troubleshooting
 
 **1. Running Kind cluster on Red Hat Enterprise Linux (RHEL) 9.5 with podman:**
 
 Check the official "Red Hat Documentation" for information about installing podman.
-During our test, we found that running kind with rootless provider on RHEL with podman will require some special setup which cannot be coverd here.
+During our test, we found that running kind with rootless provider on RHEL with podman will require some special setup which cannot be covered here.
 We used **sudo** previlege to create Kind cluster and ran the test successfully.
 Please see [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) for the installation and setup kubectl on Linux if you don't have one installed.
 
-`$ sudo kind create cluster --config local_cluster/kind-config.yaml`
+`$ sudo kind create cluster --config kind-config.yaml`
 
 Once the kind cluster is up and running, please run the following commands before using kubectl:
 ```

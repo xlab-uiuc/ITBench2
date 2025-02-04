@@ -33,7 +33,8 @@
 
 - name: Set `controller_password` value for the Ansible tower
   set_fact:
-    controller_password: "{{ awx_secret_information.resources[0].data.password | b64decode }}"
+    controller_password: "{{ awx_secret_information.resources[0].data.password | b64decode }}" # pragma: allowlist secret
+
   tags:
     - awx_scenario_setup
 
@@ -41,7 +42,7 @@
   awx.awx.credential:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Credential-Kubeconfig-Scenario-{{scenario_number}}"
     description: "Credential-Kubeconfig-Scenario-{{scenario_number}}"
     organization: Default
@@ -56,7 +57,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--InstallObservability-Stack"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -78,7 +79,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Install-Sample-Application-{{ sample_app }}"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -103,7 +104,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Setup-For-Telemetry-Access"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -128,7 +129,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Trace-Gathering"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -151,7 +152,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Trigger-Fault"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -181,7 +182,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Post-Fault-Injection"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -205,7 +206,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Run-SRE-Agent"
     job_type: "run"
     project: "Project-GitHub-Lumyn"
@@ -228,7 +229,7 @@
       is_azure: "{{ true if agent_configuration['llm_for_agents_config']['llm_backend'] == 'azure' else false }}"
       llm_model_name: "{{ agent_configuration['llm_for_agents_config']['llm_model_name'] }}"
       llm_base_url: "{{ agent_configuration['llm_for_agents_config']['llm_base_url'] }}"
-      llm_api_key: "{{ agent_configuration['llm_for_agents_config']['llm_api_key'] }}"
+      llm_api_key: "{{ agent_configuration['llm_for_agents_config']['llm_api_key'] }}" # pragma: allowlist secret
       llm_project_id: "{{ agent_configuration['llm_for_agents_config']['llm_project_id'] if agent_configuration['llm_for_agents_config']['llm_backend'] == 'watsonx' else null }}"
       llm_configuration_parameters: "{{ agent_configuration['llm_for_agents_config']['llm_configuration_parameters'] if agent_configuration['llm_for_agents_config']['llm_configuration_parameters'] is defined else null }}"
       enable_god_mode: "{{ agent_configuration['llm_for_agents_config']['enable_god_mode'] }}"
@@ -243,7 +244,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Node-Pause"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -261,7 +262,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Pre-Fault-Removal"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -285,7 +286,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Remove-Fault"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -314,7 +315,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Check-for-Alerts"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -343,7 +344,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Alert-Recorder-On"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -366,7 +367,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Alert-Recorder-Off"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -389,7 +390,7 @@
   awx.awx.schedule:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Schedule for Alert Recorder - {{ scenario_number }}"
     state: absent
     timeout: 1800
@@ -404,7 +405,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Setup-Alert-Recorder"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -421,7 +422,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--Uninstall-Sample-Application-{{ sample_app }}"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"
@@ -446,7 +447,7 @@
   awx.awx.job_template:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     name: "Scenario-{{ scenario_number }}--UninstallObservability-Stack"
     job_type: "run"
     project: "Project-GitHub-IT-Automation-Bench"

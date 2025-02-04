@@ -33,7 +33,7 @@
 
 - name: Set `controller_password` value for the Ansible tower
   set_fact:
-    controller_password: "{{ awx_secret_information.resources[0].data.password | b64decode }}"
+    controller_password: "{{ awx_secret_information.resources[0].data.password | b64decode }}" # pragma: allowlist secret
   tags:
     - workflow_launch
 
@@ -41,7 +41,7 @@
   awx.awx.workflow_launch:
     controller_host: "{{ controller_host }}"
     controller_username: "{{ controller_username }}"
-    controller_password: "{{ controller_password }}"
+    controller_password: "{{ controller_password }}" # pragma: allowlist secret
     workflow_template: "Scenario-{{scenario_number}}-One-Mode-Deployment"
     extra_vars:
       run_uuid: "{{ run_uuid }}"
