@@ -1,3 +1,4 @@
 {
-  "shared_workspace": "/tmp"
+  "shared_workspace": "/tmp/agent",
+  "kubeconfig": "/etc/ciso-task-scenarios/kubeconfig.yaml"
 }

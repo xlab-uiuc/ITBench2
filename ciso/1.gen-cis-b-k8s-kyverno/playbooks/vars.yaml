@@ -1,5 +1,5 @@
 target_ns: paa
-cluster_name: paa2
+cluster_name: ciso-scenario
 bundle_id: "cis-b.5.2.6-gen"
 bundle_title: "CIS Benchmark for K8S 5.2.6 (Kyverno)"
 work_dir: "{{ lookup('env', 'WORK_DIR') | default('/tmp/caa-bench', true) }}"
