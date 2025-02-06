@@ -19,19 +19,20 @@
         name: "{{ incident.name }}"
         path: "{{ scenario_root_path | default('IT-Automation-Testbed') }}/"
         agent_operation_timeout: "{{ incident.agent_operation_timeout_sec }}"
+        bundle_ready_timeout: "{{ incident.bundle_ready_timeout_sec }}"
         params:
-          incident_no: "{{ incident.id }}"
+          INCIDENT_NUMBER: "{{ incident.id }}"
           location: "{{ scenario_root_path | default('IT-Automation-Testbed') }}/roles/incident_{{ incident.id }}"
         scenario_type: "SRE"
         make_target_mapping:
           deploy:
-            target: "start_scenario"
+            target: "e2e_awx_init_stage_one"
           inject_fault:
             unused: "{{ incident.inject_fault_unused }}"
           evaluate:
             target: "evaluation"
           delete:
-            target: "end_scenario"
+            target: "e2e_awx_stage_three"
           status:
             target: "bundle_status"
           get:

@@ -2,12 +2,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -24,7 +25,7 @@
             },
             "name": "Recommendation Service Cache",
             "params": {
-                "incident_no": "1",
+                "INCIDENT_NUMBER": "1",
                 "location": "IT-Automation-Testbed/roles/incident_1"
             },
             "path": "IT-Automation-Testbed/",
@@ -43,12 +44,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -65,7 +67,7 @@
             },
             "name": "Cart Service",
             "params": {
-                "incident_no": "2",
+                "INCIDENT_NUMBER": "2",
                 "location": "IT-Automation-Testbed/roles/incident_2"
             },
             "path": "IT-Automation-Testbed/",
@@ -84,12 +86,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -106,7 +109,7 @@
             },
             "name": "Ad Service CPU",
             "params": {
-                "incident_no": "3",
+                "INCIDENT_NUMBER": "3",
                 "location": "IT-Automation-Testbed/roles/incident_3"
             },
             "path": "IT-Automation-Testbed/",
@@ -125,12 +128,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -147,7 +151,7 @@
             },
             "name": "Ad Service Failure",
             "params": {
-                "incident_no": "5",
+                "INCIDENT_NUMBER": "5",
                 "location": "IT-Automation-Testbed/roles/incident_5"
             },
             "path": "IT-Automation-Testbed/",
@@ -166,12 +170,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -188,7 +193,7 @@
             },
             "name": "Ad Service Manual Garbage Collection",
             "params": {
-                "incident_no": "6",
+                "INCIDENT_NUMBER": "6",
                 "location": "IT-Automation-Testbed/roles/incident_6"
             },
             "path": "IT-Automation-Testbed/",
@@ -207,12 +212,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -229,7 +235,7 @@
             },
             "name": "Payment Service Failure",
             "params": {
-                "incident_no": "7",
+                "INCIDENT_NUMBER": "7",
                 "location": "IT-Automation-Testbed/roles/incident_7"
             },
             "path": "IT-Automation-Testbed/",
@@ -248,12 +254,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -270,7 +277,7 @@
             },
             "name": "Payment Service Unreachable",
             "params": {
-                "incident_no": "8",
+                "INCIDENT_NUMBER": "8",
                 "location": "IT-Automation-Testbed/roles/incident_8"
             },
             "path": "IT-Automation-Testbed/",
@@ -289,12 +296,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -311,7 +319,7 @@
             },
             "name": "Load generator flood home page",
             "params": {
-                "incident_no": "9",
+                "INCIDENT_NUMBER": "9",
                 "location": "IT-Automation-Testbed/roles/incident_9"
             },
             "path": "IT-Automation-Testbed/",
@@ -330,12 +338,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -352,7 +361,7 @@
             },
             "name": "product catalog failure and recommendation Service memory cache",
             "params": {
-                "incident_no": "12",
+                "INCIDENT_NUMBER": "12",
                 "location": "IT-Automation-Testbed/roles/incident_12"
             },
             "path": "IT-Automation-Testbed/",
@@ -371,12 +380,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -393,7 +403,7 @@
             },
             "name": "Payment Service Failure and Payment Service Unreachable",
             "params": {
-                "incident_no": "13",
+                "INCIDENT_NUMBER": "13",
                 "location": "IT-Automation-Testbed/roles/incident_13"
             },
             "path": "IT-Automation-Testbed/",
@@ -412,12 +422,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -434,7 +445,7 @@
             },
             "name": "Payment Service Failure and Ad Service Failure",
             "params": {
-                "incident_no": "14",
+                "INCIDENT_NUMBER": "14",
                 "location": "IT-Automation-Testbed/roles/incident_14"
             },
             "path": "IT-Automation-Testbed/",
@@ -453,12 +464,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -475,7 +487,7 @@
             },
             "name": "Payment Service Unreachable and Ad Service Failure",
             "params": {
-                "incident_no": "15",
+                "INCIDENT_NUMBER": "15",
                 "location": "IT-Automation-Testbed/roles/incident_15"
             },
             "path": "IT-Automation-Testbed/",
@@ -494,12 +506,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -516,7 +529,7 @@
             },
             "name": "checkoutservice Corrupt Deployment",
             "params": {
-                "incident_no": "16",
+                "INCIDENT_NUMBER": "16",
                 "location": "IT-Automation-Testbed/roles/incident_16"
             },
             "path": "IT-Automation-Testbed/",
@@ -535,12 +548,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -557,7 +571,7 @@
             },
             "name": "ProductCatalog Network Delay Chaos",
             "params": {
-                "incident_no": "17",
+                "INCIDENT_NUMBER": "17",
                 "location": "IT-Automation-Testbed/roles/incident_17"
             },
             "path": "IT-Automation-Testbed/",
@@ -576,12 +590,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -598,7 +613,7 @@
             },
             "name": "checkoutservice Pod Failure Chaos",
             "params": {
-                "incident_no": "18",
+                "INCIDENT_NUMBER": "18",
                 "location": "IT-Automation-Testbed/roles/incident_18"
             },
             "path": "IT-Automation-Testbed/",
@@ -617,12 +632,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -639,7 +655,7 @@
             },
             "name": "shippingservice to quoteservice Network Partition Chaos",
             "params": {
-                "incident_no": "19",
+                "INCIDENT_NUMBER": "19",
                 "location": "IT-Automation-Testbed/roles/incident_19"
             },
             "path": "IT-Automation-Testbed/",
@@ -658,12 +674,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -680,7 +697,7 @@
             },
             "name": "productcatalogservice Corrupt Image",
             "params": {
-                "incident_no": "20",
+                "INCIDENT_NUMBER": "20",
                 "location": "IT-Automation-Testbed/roles/incident_20"
             },
             "path": "IT-Automation-Testbed/",
@@ -699,12 +716,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -721,7 +739,7 @@
             },
             "name": "checkoutservice Corrupt Image",
             "params": {
-                "incident_no": "23",
+                "INCIDENT_NUMBER": "23",
                 "location": "IT-Automation-Testbed/roles/incident_23"
             },
             "path": "IT-Automation-Testbed/",
@@ -740,12 +758,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -762,7 +781,7 @@
             },
             "name": "recommendationservice CPU Stress Chaos",
             "params": {
-                "incident_no": "25",
+                "INCIDENT_NUMBER": "25",
                 "location": "IT-Automation-Testbed/roles/incident_25"
             },
             "path": "IT-Automation-Testbed/",
@@ -781,12 +800,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -803,7 +823,7 @@
             },
             "name": "HTTP request tamper fault",
             "params": {
-                "incident_no": "26",
+                "INCIDENT_NUMBER": "26",
                 "location": "IT-Automation-Testbed/roles/incident_26"
             },
             "path": "IT-Automation-Testbed/",
@@ -822,12 +842,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -844,7 +865,7 @@
             },
             "name": "Abort HTTP request fault",
             "params": {
-                "incident_no": "27",
+                "INCIDENT_NUMBER": "27",
                 "location": "IT-Automation-Testbed/roles/incident_27"
             },
             "path": "IT-Automation-Testbed/",
@@ -863,12 +884,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -885,7 +907,7 @@
             },
             "name": "HTTP request tamper fault for user_1",
             "params": {
-                "incident_no": "28",
+                "INCIDENT_NUMBER": "28",
                 "location": "IT-Automation-Testbed/roles/incident_28"
             },
             "path": "IT-Automation-Testbed/",
@@ -904,12 +926,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -926,7 +949,7 @@
             },
             "name": "JVM code injection fault",
             "params": {
-                "incident_no": "29",
+                "INCIDENT_NUMBER": "29",
                 "location": "IT-Automation-Testbed/roles/incident_29"
             },
             "path": "IT-Automation-Testbed/",
@@ -945,12 +968,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -967,7 +991,7 @@
             },
             "name": "Downgrade Ad Service",
             "params": {
-                "incident_no": "32",
+                "INCIDENT_NUMBER": "32",
                 "location": "IT-Automation-Testbed/roles/incident_32"
             },
             "path": "IT-Automation-Testbed/",
@@ -986,12 +1010,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -1008,7 +1033,7 @@
             },
             "name": "CartService Incorrect Authentication",
             "params": {
-                "incident_no": "34",
+                "INCIDENT_NUMBER": "34",
                 "location": "IT-Automation-Testbed/roles/incident_34"
             },
             "path": "IT-Automation-Testbed/",
@@ -1027,12 +1052,13 @@
     {
         "bundle": {
             "agent_operation_timeout": "3000",
+            "bundle_ready_timeout": "3000",
             "make_target_mapping": {
                 "delete": {
-                    "target": "end_scenario"
+                    "target": "e2e_awx_stage_three"
                 },
                 "deploy": {
-                    "target": "start_scenario"
+                    "target": "e2e_awx_init_stage_one"
                 },
                 "evaluate": {
                     "target": "evaluation"
@@ -1049,7 +1075,7 @@
             },
             "name": "",
             "params": {
-                "incident_no": "102",
+                "INCIDENT_NUMBER": "102",
                 "location": "IT-Automation-Testbed/roles/incident_102"
             },
             "path": "IT-Automation-Testbed/",

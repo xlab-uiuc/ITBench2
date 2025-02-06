@@ -15,6 +15,7 @@ docs_incident_26:
   complexity: Medium
   inject_fault_unused: true
   agent_operation_timeout_sec: 3000
+  bundle_ready_timeout_sec: 3000
   golden_signal_cause: traffic
   golden_signal_effect: error
   incidentPattern: HTTPRequestBodyTamperFault
