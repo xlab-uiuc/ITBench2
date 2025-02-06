@@ -15,6 +15,7 @@ docs_incident_102:
   complexity: Low
   inject_fault_unused: true
   agent_operation_timeout_sec: 3000
+  bundle_ready_timeout_sec: 3000
   golden_signal_cause: resource unavailability
   golden_signal_effect: error
   incidentPattern: MemoryResourceLimit
