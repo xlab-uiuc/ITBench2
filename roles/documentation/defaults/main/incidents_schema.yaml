@@ -25,6 +25,8 @@ valid_documentation_schema:
         type: boolean
       "agent_operation_timeout_sec": # Mandatory
         type: integer
+      "bundle_ready_timeout_sec": # Mandatory
+        type: integer
       "golden_signal_cause": # Optional
         type: string
         enum: [ "saturation", "resource unavailability", "traffic" ]
@@ -178,4 +180,4 @@ valid_documentation_schema:
             type: string
     additionalProperties: false
     required: ["id", "name", "platform", "dsl_format", "description", "application", "complexity",
-               "inject_fault_unused", "fault", "alerts" ]
+               "inject_fault_unused", "agent_operation_timeout_sec", "bundle_ready_timeout_sec", "fault", "alerts"]
