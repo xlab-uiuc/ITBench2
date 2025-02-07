@@ -3,7 +3,7 @@
 **[Paper](./it_bench_arxiv.pdf) | [Scenarios](#scenarios) | [Agents](#agents) | [Contributors](#contributors) | [Contacts](#contacts)**
 
 This repo contains a sample of task scenarios of our IT-Bench, a framework for benchmarking AI agents to address real-world IT automation tasks.
-We targets three key areas:
+We target three key personas:
 - Site Reliability Engineering (SRE) - focusing on availability and resiliency
 - Compliance and Security Operations (CISO) - ensuring compliance and security of IT implementations
 - Financial Operations (FinOps) - enforcing cost efficiencies and optimizing return on investment
