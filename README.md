@@ -1,6 +1,6 @@
 # ITBench
 
-**[Paper](./it_bench_arxiv.pdf) | [Scenarios](#scenarios) | [Agents](#agents) | [Contributors](#contributors)**
+**[Paper](./it_bench_arxiv.pdf) | [Scenarios](#scenarios) | [Agents](#agents) | [Contributors](#contributors) | [Contacts](#contacts)**
 
 This repo contains a sample of task scenarios of our IT-Bench, a framework for benchmarking AI agents to address real-world IT automation tasks.
 We targets three key areas:
@@ -56,8 +56,8 @@ Source code repository [here](https://github.com/IBM/itbench-sre-agent).
 - Rohan Arora
 - Yuji Watanabe
 - Takumi Yanagawa
-- Yinfang Chen
-- Jackson Clark
+- Yinfang Chen (UIUC - University of Illinois at Urbana-Champaign)
+- Jackson Clark (UIUC - University of Illinois at Urbana-Champaign)
 - Bhavya Bhavya
 - Mudit Verma
 - Harshit Kumar
@@ -66,7 +66,7 @@ Source code repository [here](https://github.com/IBM/itbench-sre-agent).
 - Saki Takano
 - Divya Pathak
 - Felix George
-- Xinbo Wu{uiuc
+- Xinbo Wu (UIUC - University of Illinois at Urbana-Champaign)
 - Bekir O Turkkan
 - Gerard Vanloo
 - Michael Nidd
@@ -87,11 +87,17 @@ Source code repository [here](https://github.com/IBM/itbench-sre-agent).
 - Prateeti Mohapatra
 - Naoki Abe
 - Chandrasekhar Narayanaswami
-- Tianyin Xu{uiuc
-- Lav R. Varshney{uiuc
+- Tianyin Xu (UIUC - University of Illinois at Urbana-Champaign)
+- Lav R. Varshney (UIUC - University of Illinois at Urbana-Champaign)
 - Ruchi Mahindru
 - Anca Sailer
 - Laura Shwartz
 - Daby Sow
 - Nicholas C. M. Fuller
 - Ruchir Puri
+
+## Contacts
+- Saurabh Jha (saurabh.jha@ibm.com)
+- Yuji Wantabe (muew@jp.ibm.com)
+- Ruchi Mahindru (rmahindr@us.ibm.com)
+- Anca Sailer (ancas@us.ibm.com)
