@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# IT Automation Testbed for Open Source 
-=======
 # ITBench for Site Reliability Engineering (SRE) and Financial Operations (FinOps)
->>>>>>> bcf79a20722c99f045c9eaeab7b748206cf51adc
 
 **[Paper](#paper) | [Incident Scenarios](./docs/incident_scenarios.md) | [Tools](./docs/tools.md) | [Maintainers](#maintainers)**
 
