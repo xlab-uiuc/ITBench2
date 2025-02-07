@@ -95,6 +95,22 @@
   tags:
     - documentation
 
+- name: Validate alert location group references
+  assert:
+    that: alert_locations is subset(ground_truth_groups)
+    fail_msg: "Unknown ID in {{ gt.id }}: alert group_id {{ missing }} not defined in groups."
+    msg: "All ground truth alert group_id values in {{ gt.id }} reference known group IDs."
+    quiet: yes
+  vars:
+    ground_truth_groups: "{{ gt.groups | map(attribute='id') | sort | list }}"
+    alert_locations: "{{ gt.alerts | map(attribute='group_id') | unique | list }}"
+    missing: "{{ alert_locations | difference(ground_truth_groups) | list }}"
+  loop: "{{ ground_truth_list }}"
+  loop_control:
+    loop_var: gt
+  tags:
+    - documentation
+
 - name: Write ground_truths to JSON file
   copy:
     dest: "ground_truths.json"

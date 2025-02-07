@@ -5,6 +5,7 @@
     kubeconfig_path: "{{ kubeconfig }}"
     release_namespace: "{{ otel_astronomy_app_namespace_project_name }}"
     state: absent
+    wait: true
   tags:
     - uninstall_sample_applications
   when:
@@ -13,34 +14,13 @@
 - name: Remove the namespace associated with the installation of OpenTelemetry's Astronomy Shop Demo
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig }}"
-    name: "{{ otel_astronomy_app_installation_name }}"
+    name: "{{ otel_astronomy_app_namespace_project_name }}"
     api_version: v1
     kind: Namespace
     state: absent
+    wait: true
   tags:
     - uninstall_sample_applications
   when:
     - sample_application == "otel_astronomy_shop"
 
-- name: Create namespace to delete list
-  set_fact:
-    namespace_delete_list:
-      - "{{ otel_astronomy_app_namespace_project_name }}"
-  tags:
-    - uninstall_sample_applications
-  when:
-    - sample_application == "otel_astronomy_shop"
-
-- name: Get all namespaces
-  kubernetes.core.k8s_info:
-    kubeconfig: "{{ kubeconfig }}"
-    kind: Namespace
-  register: namespaces
-  until: "{{ namespaces.resources | json_query('[].metadata.name') | list | intersect(namespace_delete_list) | length < 1 }}"
-  retries: 20
-  delay: 30
-  ignore_errors: yes
-  tags:
-    - uninstall_sample_applications
-  when:
-    - sample_application == "otel_astronomy_shop"

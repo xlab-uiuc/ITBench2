@@ -1,9 +1,8 @@
-# aws-k8-provisioner
+# Remote Cluster Setup
 
-Creates a K8 cluster using kOps on AWS. It uses ansbile script to automate the cluster creation and support some of the workflows that I generally run to execute my experiments. 
+Creates a K8 cluster using kOps on AWS. It uses Ansible playbooks to automate the cluster creation and support some of the workflows. 
 
-Steps were borrowed from:
-https://aws.amazon.com/blogs/compute/kubernetes-clusters-aws-kops/
+Steps are largely based on [https://aws.amazon.com/blogs/compute/kubernetes-clusters-aws-kops/](https://aws.amazon.com/blogs/compute/kubernetes-clusters-aws-kops/)
 
 # Developer Guide
 
@@ -49,10 +48,13 @@ cp -n playbooks/secret.yaml.example playbooks/secret.yaml
 ssh_key_for_cluster: "/home/<user>/.ssh/<key-name>.pub"
 ```
 
-6. To set up your local machine with the aws-cli, jq, kubectl and kops run. BECOME password is your user password or root password.
+6. To set up your local machine with the curl, aws-cli, jq, kubectl and kops run:
 ```bash
+# BECOME password is your user password or root password. 
 make configure_localmachine
 ```
+For Red Hat Enterprise Linux (RHEL), Fedora, CentOS installs to: /usr/local/bin
+For MacOS installation uses Homebrew.
 
 7. Set up AWS credentials by running the following command. Enter the AWS access key ID and security access key when requested.
 ```bash
@@ -78,23 +80,15 @@ export KUBECONFIG=/tmp/<downloaded yaml>
 kubectl get pod --all-namespaces
 ``` 
 
-4. To destroy the cluster, run the following command:
+4. Now let's head back to the [parent README](../README.md).
+   
+5. Once done with the experiment runs, to destroy the cluster, run the following command:
 ```bash
 make delete
 ```
 
-## Expose services
+_Note_: For a full list of `make` commands, run the following command:
 
-1. Expose opentelemetry frontendproxy service: (`otel-demo` namespace is defined in [set_env_vars.sh](../set_env_vars.sh), `opentelemetry-demo-frontendproxy` is the service name from the output of `kubectl get svc -n otel-demo`.)
-```bash
-kubectl get svc -n otel-demo
-kubectl port-forward svc/opentelemetry-demo-frontendproxy 8080:8080 -n otel-demo
-```
-
-
-## Makefile Options
-
-For a full list of options, run the following command:
 ```bash
 make help
 ```

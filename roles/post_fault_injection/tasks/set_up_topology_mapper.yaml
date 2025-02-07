@@ -6,6 +6,7 @@
     dependency_update: true
     release_namespace: "kube-system"
     state: present
+    wait: true
   tags:
     - post_fault_injection
 
