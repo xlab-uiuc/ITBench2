@@ -310,7 +310,7 @@ Before starting the task scenario, ensure that all necessary tools and environme
 
     **Notes on Input Values**
     - Replace `<PATH/TO/SCENARIO_WORKDIR>` with the actual path for your workdir for scenario
-    - Replace `<PATH/TO/AGENT_WORKDIR>` with the actual path for your workdir for agent, which must be consistent with the `<PATH/TO/WORKDIR>` used in [ciso-agent](https://github.ibm.com/project-polaris/ciso-agent).
+    - Replace `<PATH/TO/AGENT_WORKDIR>` with the actual path for your workdir for agent, which must be consistent with the `<PATH/TO/WORKDIR>` used in [ciso-caa-agent](https://github.com/IBM/it-bench-ciso-caa-agent).
     - Replace `<PATH/TO/KUBECONFIG>` with the actual path for your kubeconfig file
 
 
@@ -440,8 +440,8 @@ The example below demonstrates the steps for `1.gen-cis-b-k8s-kyverno`. When try
 
     The cluster's kubeconfig is at `{{ kubeconfig }}`.
     ```
-1. Run your Agent with the goal description to achieve the objective. You can also use the CISO agent (https://github.ibm.com/project-polaris/ciso-agent) as an example.
-    - For the scenario [2.gen-cis-b-k8s-kubectl-opa](#2-gen-cis-b-k8s-kubectl-opa), the goal requires the Agent to submit generated policy and scripts. In that case, please place the Agent's output files in `<PATH/TO/AGENT_WORKDIR>` (The CISO agent is already configured to place its output files in this directory by adding a single sentence `You can use "/tmp/agent" as your workdir."`. See [ciso-agent#4-start-the-agent](https://github.ibm.com/project-polaris/ciso-agent?tab=readme-ov-file#4-start-the-agent) for the details.) These files will be used in the next step, "Evaluation".
+1. Run your Agent with the goal description to achieve the objective. You can also use the CISO CAA agent (https://github.com/IBM/it-bench-ciso-caa-agent) as an example.
+    - For the scenario [2.gen-cis-b-k8s-kubectl-opa](#2-gen-cis-b-k8s-kubectl-opa), the goal requires the Agent to submit generated policy and scripts. In that case, please place the Agent's output files in `<PATH/TO/AGENT_WORKDIR>` (The CISO CAA agent is already configured to place its output files in this directory by adding a single sentence `You can use "/tmp/agent" as your workdir."`. See [ciso-caa-agent#4-start-the-agent](https://github.com/IBM/it-bench-ciso-caa-agent?tab=readme-ov-file#4-start-the-agent) for the details.) These files will be used in the next step, "Evaluation".
 1. Once your agent is finished, run evaluation.
     ```
     docker run --rm -ti --name ciso-task-scenario \
@@ -465,7 +465,7 @@ The example below demonstrates the steps for `1.gen-cis-b-k8s-kyverno`. When try
         }
     }       
     ```
-    - If the `pass` is `true`, the CISO Agent has successfully deployed the correct Kyverno Policy. You can check the Kyverno Policy that the CISO Agent created.
+    - If the `pass` is `true`, the CISO CAA Agent has successfully deployed the correct Kyverno Policy. You can check the Kyverno Policy that the CISO CAA Agent created.
         ```
         $ kubectl get clusterpolicy
         NAME                          ADMISSION   BACKGROUND   READY   AGE     MESSAGE
@@ -604,9 +604,9 @@ The example below demonstrates the steps for `1.gen-cis-b-k8s-kyverno`. When try
 
     The Ansible inventory file (inventory.ansible.ini) for the target RHEL server is located at `{{ path_to_inventory }}`.
     ```
-1. Run your Agent with the goal description to achieve the objective. You can also use the CISO agent (https://github.ibm.com/project-polaris/ciso-agent) as an example.
-    - Please place `playbook.yml` and `policy.rego` in `<PATH/TO/AGENT_WORKDIR>` (The CISO agent is already configured to place its output files in this directory by adding a single sentence `You can use "/tmp/agent" as your workdir."`. See [ciso-agent#4-start-the-agent](https://github.ibm.com/project-polaris/ciso-agent?tab=readme-ov-file#4-start-the-agent) for the details.) These files will be used in the next step, "Evaluation".
-    1. To run the CISO agent (https://github.ibm.com/project-polaris/ciso-agent).
+1. Run your Agent with the goal description to achieve the objective. You can also use the CISO CAA agent (https://github.com/IBM/it-bench-ciso-caa-agent) as an example.
+    - Please place `playbook.yml` and `policy.rego` in `<PATH/TO/AGENT_WORKDIR>` (The CISO CAA agent is already configured to place its output files in this directory by adding a single sentence `You can use "/tmp/agent" as your workdir."`. See [ciso-caa-agent#4-start-the-agent](https://github.com/IBM/it-bench-ciso-caa-agent?tab=readme-ov-file#4-start-the-agent) for the details.) These files will be used in the next step, "Evaluation".
+    1. To run the CISO CAA agent (https://github.com/IBM/it-bench-ciso-caa-agent).
         - Replace `{{ path_to_inventory }}` with `/tmp/agent/inventory.anible.ini` in the above goal description.
         - Add on sentence "You can use `/tmp/agent\` as your workdir."
         ```
@@ -633,7 +633,7 @@ The example below demonstrates the steps for `1.gen-cis-b-k8s-kyverno`. When try
     ```
     {"pass": true, "details": "[fetcher] cmd: ['ansible-playbook', '/tmp/agent/playbook.yml', '-i', '/tmp/agent/inventory.ansible.ini'], stdout: \nPLAY [Collect SSH configuration to check X11 forwarding] ***********************\n\nTASK [Gathering Facts] *********************************************************\nok: [rhel9]\n\nTASK [Check if X11 forwarding is disabled in SSH configuration] ****************\nchanged: [rhel9]\n\nTASK [Save the SSH configuration check result] *********************************\nchanged: [rhel9 -> localhost]\n\nTASK [Collect additional information if X11 forwarding is enabled] *************\nchanged: [rhel9]\n\nTASK [Save additional information if X11 forwarding is enabled] ****************\nchanged: [rhel9 -> localhost]\n\nPLAY RECAP *********************************************************************\nrhel9                      : ok=5    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   , stderr: \n[checker] cmd: ['opa', 'eval', '--data', '/tmp/agent/policy.rego', '--input', '/tmp/agent/collected_data.json', 'data.check.result', '--format', 'raw'], stdout: false, stderr: \n"}    
     ```
-    - If the `pass` is `true`, the CISO Agent has successfully created playbook for status collection and OPA policy for compliance checking aganst the collected data.
+    - If the `pass` is `true`, the CISO CAA Agent has successfully created playbook for status collection and OPA policy for compliance checking aganst the collected data.
 1. Now you successfully finished a single evaluation of the Agent. You can cleanup the scenario environment by `revert` command, which revert all the injected fault configuration and remove a temporary created user (the username is ansible_user).
     ```
     docker run --rm -ti --name ciso-task-scenario \
