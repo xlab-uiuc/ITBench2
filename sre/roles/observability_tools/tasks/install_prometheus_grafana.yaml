@@ -30,6 +30,7 @@
     release_namespace: "{{ prometheus_namespace_project_name }}"
     release_state: present
     create_namespace: true
+    wait: true
     set_values:
       - value: prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
         value_type: raw
@@ -71,7 +72,6 @@
         value_type: raw
       - value: "prometheus.enabled={{ true if enable_prometheus_query_endpoint else false }}"
         value_type: raw
-    wait_timeout: "5m"
   tags:
     - install_tools
   when:
