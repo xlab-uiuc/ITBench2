@@ -33,16 +33,10 @@ docs_incident_26:
   alerts:
     - id: Error_Rate_is_Above_Threshold_checkout
       text: Error Rate is Above Threshold
-      location:
-        name: checkoutservice
-        namespace: otel-demo
-        kind: Service
+      group_id: checkout-service-1
     - id: Error_Rate_is_Above_Threshold_email
       text: Error Rate is Above Threshold
-      location:
-        name: emailservice
-        namespace: otel-demo
-        kind: Service
+      group_id: email-service-1
   groups:
     - id: tamper-body-otel-demo-emailservice-1
       kind: HttpChaos

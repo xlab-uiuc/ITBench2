@@ -28,10 +28,7 @@ docs_incident_3:
   alerts:
     - id: Error_Rate_is_Above_Threshold_frontend
       text: Error Rate is Above Threshold
-      location:
-        kind: Service
-        name: frontend
-        namespace: otel-demo
+      group_id: frontend-service-1
   "fault":
     - "entity":
         "name": "otel-demo-frontend"

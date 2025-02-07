@@ -25,7 +25,7 @@
     return_content: true
   register: grafana_health_check
   retries: 5
-  delay: 15
+  delay: 60
   until: grafana_health_check.content == "Ok"
   tags:
     - install_tools

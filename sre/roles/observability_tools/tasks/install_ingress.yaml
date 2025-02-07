@@ -30,7 +30,8 @@
     release_namespace: "{{ ingress_namespace_project_name }}"
     release_state: present
     create_namespace: true
-    wait_timeout: "5m"
+    wait: true
+    timeout: 10m0s
   tags:
     - install_tools
   when:

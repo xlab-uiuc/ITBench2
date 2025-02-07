@@ -30,6 +30,8 @@
     release_namespace: "{{ loki_namespace_project_name }}"
     release_state: present
     create_namespace: true
+    wait: true
+    timeout: 10m0s
     set_values:
       - value: config.leaderElection={}
         value_type: json
@@ -57,7 +59,6 @@
         value_type: raw
       - value: config.route.routes[0].match[1].receiver="loki"
         value_type: raw
-    wait_timeout: "5m"
   tags:
     - install_tools
   when:
