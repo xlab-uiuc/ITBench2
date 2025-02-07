@@ -46,6 +46,8 @@
     release_namespace: "{{ jaeger_namespace_project_name }}"
     release_state: present
     create_namespace: true
+    wait: true
+    timeout: 10m0s
     set_values:
       - value: provisionDataStore.cassandra=false
         value_type: raw
@@ -71,7 +73,6 @@
         value_type: raw
       - value: "query.enabled={{ true if (enable_jaeger_query_endpoint | lower | bool) else false}}"
         value_type: raw
-    wait_timeout: "5m"
   tags:
     - install_tools
   when:

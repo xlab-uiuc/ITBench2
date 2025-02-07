@@ -36,22 +36,13 @@ docs_incident_27:
   alerts:
     - id: Error_Rate_is_Above_Threshold_frontend
       text: Error Rate is Above Threshold
-      location:
-        name: frontend
-        namespace: otel-demo
-        kind: Service
+      group_id: frontend-service-1
     - id: Error_Rate_is_Above_Threshold_checkout
       text: Error Rate is Above Threshold
-      location:
-        name: checkoutservice
-        namespace: otel-demo
-        kind: Service
+      group_id: checkout-service-1
     - id: Error_Rate_is_Above_Threshold_shipping
       text: Error Rate is Above Threshold
-      location:
-        name: shippingservice
-        namespace: otel-demo
-        kind: Service
+      group_id: shipping-service-1
   groups:
     - id: http-abort-otel-demo-quoteservice-1
       kind: HttpChaos

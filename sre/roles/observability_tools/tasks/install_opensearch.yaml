@@ -31,7 +31,8 @@
     release_state: present
     create_namespace: true
     values: "{{ lookup('template', 'install_opensearch.values.yaml') | from_yaml }}"
-    wait_timeout: "5m"
+    wait: true
+    timeout: 10m0s
   tags:
     - install_tools
   when:

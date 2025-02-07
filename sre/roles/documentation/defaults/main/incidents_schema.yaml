@@ -89,19 +89,9 @@ valid_documentation_schema:
               type: string
             "text":
               type: string
-            "location":
-              type: object
-              properties:
-                "name":
-                  type: string
-                "namespace":
-                  type: string
-                "kind":
-                  type: string
-                  enum: [ "Pod", "Service", "Deployment", "Node", "ConfigMap", "Endpoint", "Process" ]
-              required: [ "name", "namespace", "kind" ]
-              additionalProperties: false
-          required: [ "id", "text", "location" ]
+            "group_id":
+              type: string
+          required: [ "id", "text", "group_id" ]
           additionalProperties: false
       "groups":
         type: array

@@ -33,10 +33,7 @@ docs_incident_102:
   alerts:
   - id: Error_Rate_is_Above_Threshold_frontend
     text: Error Rate is Above Threshold
-    location:
-      name: frontend
-      namespace: hotel-reservations
-      kind: Service
+    group_id: frontend-service-1
   groups:
   - id: search-namespace
     kind: Namespace

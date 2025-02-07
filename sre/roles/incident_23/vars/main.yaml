@@ -33,10 +33,7 @@ docs_incident_23:
   alerts:
     - id: Error_Rate_is_Above_Threshold_frontend
       text: Error Rate is Above Threshold
-      location:
-        name: frontend
-        namespace: otel-demo
-        kind: Service
+      group_id: frontend-service-1
   groups:
     - id: checkout-pod-1
       kind: Pod
