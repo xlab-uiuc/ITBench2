@@ -1,6 +1,6 @@
 # ITBench for Site Reliability Engineering (SRE) and Financial Operations (FinOps)
 
-**[Paper](#paper) | [Incident Scenarios](./docs/incident_scenarios.md) | [Tools](./docs/tools.md) | [Maintainers](#maintainers)**
+**[Paper](../it_bench_arxiv.pdf) | [Incident Scenarios](./docs/incident_scenarios.md) | [Tools](./docs/tools.md) | [Maintainers](#maintainers)**
 
 ## Walkthrough
 ### Cluster Setup

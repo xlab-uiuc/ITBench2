@@ -13,17 +13,13 @@ We targets three key areas:
 ## Scenarios
 ITBench incorporates a collection of problems that we call scenarios. For example, one of the SRE scenarios in ITBench is to resolve a “High error rate on service order-management” in a Kubernetes environment. Another scenario that is relevant for the CISO persona involves assessing the compliance posture for a “new control rule detected for RHEL 9.” Each of the ITBench scenarios are deployed in an operational environment in which problem(s) occur. 
 
-### CISO Scenarios
-Located in [`./ciso`](./ciso)
-
+### [CISO Scenarios](./ciso)
 These scenarios simulate compliance-related misconfigurations. Each scenario provides:
 - A pre-configured environment with specific compliance issues
 - Tools to detect misconfigurations
 - Validation methods to verify successful remediation
 
-### SRE Scenarios
-Located in [`./sre`](./sre)
-
+### [SRE Scenarios](./sre)
 These scenarios focus on observability and incident response. Each scenario includes:
 - A comprehensive observability stack deployment featuring:
   - Prometheus for metrics collection
@@ -35,9 +31,7 @@ These scenarios focus on observability and incident response. Each scenario incl
 - Simulated faults that trigger service degradation
 - Thereby leading to alerts associated with application performance issues such as increased error rates and latency spikes
 
-### FinOps Scenarios
-Located in [`./sre`](./sre)
-
+### [FinOps Scenarios](./sre)
 Each scenario includes:
 - The core SRE observability stack
 - OpenCost integration for cost monitoring
