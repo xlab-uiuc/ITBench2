@@ -1,6 +1,6 @@
 # ITBench
 
-**[Paper](./it_bench_arxiv.pdf) | [Scenarios](#scenarios) | [Agents](#agents) | [Contributors](#contributors) | [Contacts](#contacts)**
+**[Paper](./it_bench_arxiv.pdf) | [Scenarios](#scenarios) | [Agents](#agents) | [How to Cite]()| [Contributors](#contributors) | [Contacts](#contacts)**
 
 The goal of ITBench is to measure the performance of AI agents across a wide variety of complex and real-life IT automation tasks targetting three key personas:
 - Site Reliability Engineering (SRE) - focusing on availability and resiliency
@@ -19,7 +19,6 @@ As of February 2025, we are open-sourcing:
 1. Push-button deployment tooling for environment setup
 2. Framework for recreating:
    * 6 SRE scenarios
-   * 1 FinOps scenario
    * 4 categories of CISO scenarios
 3. Two reference AI agents:
    * CISO (Chief Information Security Officer) Agent
@@ -68,6 +67,16 @@ Source code repository [here](https://github.com/IBM/itbench-ciso-caa-agent).
 
 ### SRE Agent
 Source code repository [here](https://github.com/IBM/itbench-sre-agent).
+
+### How to Cite
+```
+@misc{jha2025itbench,
+      title={ITBench: Evaluating AI Agents across Diverse Real-World IT Automation Tasks},
+      author={Jha, Saurabh and Arora, Rohan and Watanabe, Yuji and others},
+      year={2025},
+      url={https://github.com/IBM/itbench-sample-scenarios/blob/main/it_bench_arxiv.pdf}
+}
+```
 
 ## Contributors
 - Saurabh Jha
