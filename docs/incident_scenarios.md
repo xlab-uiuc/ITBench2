@@ -1,6 +1,6 @@
-# ITBench: SRE Incident Scenarios
+# ITBench: SRE Incident and FinOps Scenarios
 
-The following incident scenario are being open-sourced at this time and their implementation can be found [here](../roles).
+Currently, ITBench comprises of an initial set of 42 SRE scenarios and 2 FinOps scenarios. The following scenarios are being open-sourced at this time and their implementation can be found [here](../roles):
 
 | ID | Name | Platform | DSL Format | Description | Application | Complexity | Technologies | Golden Signal Cause | Golden Signal Effect |
 |---|---|---|---|---|---|---|---|---|---|
