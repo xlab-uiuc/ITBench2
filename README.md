@@ -2,6 +2,21 @@
 
 **[Paper](./it_bench_arxiv.pdf) | [Scenarios](#scenarios) | [Agents](#agents) | [How to Cite]()| [Contributors](#contributors) | [Contacts](#contacts)**
 
+
+# 📢 Announcements
+
+## Latest Updates
+- **[February 7, 2025]** Initial release 0.1.0! 🎉 Includes research paper, self-hosted environment setup tooling, sample scenarios, and baseline agents
+
+## Coming Soon
+- **[March 2025]** Limited Access Beta 🏆
+Get invite-only access to the ITBench hosted scenario evnironments and be one of the first participants on our leaderboard. You register your SRE, FinOps, or CISO AI agent and prep it for interacting with the ITBench-hosted scenario environments.  ITBench automatically handles scenario deployment, agent evaluation, and leaderboard updates. To request access, e-mail us [here](agent-bench-automation@ibm.com).
+
+- **[April 2025]** Public Launch 🚀
+Complete ITBench platform access opens to all.
+
+## Overview
+
 The goal of ITBench is to measure the performance of AI agents across a wide variety of complex and real-life IT automation tasks targetting three key personas:
 - Site Reliability Engineering (SRE) - focusing on availability and resiliency
 - Financial Operations (FinOps) - focusing on enforcing cost efficiencies and optimizing return on investment
@@ -124,6 +139,7 @@ Source code repository [here](https://github.com/IBM/itbench-sre-agent).
 - Ruchir Puri
 
 ## Contacts
+- agent-bench-automation@ibm.com
 - Saurabh Jha (saurabh.jha@ibm.com)
 - Yuji Wantabe (muew@jp.ibm.com)
 - Ruchi Mahindru (rmahindr@us.ibm.com)
