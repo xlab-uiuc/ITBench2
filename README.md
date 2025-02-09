@@ -1,23 +1,53 @@
 # ITBench
 
-**[Paper](./it_bench_arxiv.pdf) | [Scenarios](#scenarios) | [Agents](#agents) | [Contributors](#contributors) | [Contacts](#contacts)**
+**[Paper](./it_bench_arxiv.pdf) | [Scenarios](#scenarios) | [Agents](#agents) | [How to Cite]()| [Contributors](#contributors) | [Contacts](#contacts)**
 
-This repo contains a sample of task scenarios of our IT-Bench, a framework for benchmarking AI agents to address real-world IT automation tasks.
-We target three key personas:
+
+# 📢 Announcements
+
+## Latest Updates
+- **[February 7, 2025]** Initial release 0.1.0! 🎉 Includes research paper, self-hosted environment setup tooling, sample scenarios, and baseline agents
+
+## Coming Soon
+- **[March 2025]** Limited Access Beta 🏆
+Get invite-only access to the ITBench hosted scenario evnironments and be one of the first participants on our leaderboard. You register your SRE, FinOps, or CISO AI agent and prep it for interacting with the ITBench-hosted scenario environments.  ITBench automatically handles scenario deployment, agent evaluation, and leaderboard updates. To request access, e-mail us [here](agent-bench-automation@ibm.com).
+
+- **[April 2025]** Public Launch 🚀
+Complete ITBench platform access opens to all.
+
+## Overview
+
+The goal of ITBench is to measure the performance of AI agents across a wide variety of complex and real-life IT automation tasks targetting three key personas:
 - Site Reliability Engineering (SRE) - focusing on availability and resiliency
-- Compliance and Security Operations (CISO) - ensuring compliance and security of IT implementations
-- Financial Operations (FinOps) - enforcing cost efficiencies and optimizing return on investment
+- Financial Operations (FinOps) - focusing on enforcing cost efficiencies and optimizing return on investment
+- Compliance and Security Operations (CISO) - focusing on ensuring compliance and security of IT implementations
 
-![sample_tasks](./sample_it_tasks.png)
+![sample_tasks](./images/sample_it_tasks.png)
+Through push-button workflows and interpretable metrics, it helps AI researchers and developers explore both the challenges and potential of IT automation.
+
+ITBench centers on two core principles:
+1. Real-world representation of IT environments and incident scenarios that happen in such environments
+2. Open, extensible framework with comprehensive IT coverage
+
+ITBench enables researchers and developers to replicate real-world incidents in Kubernetes environments (scenarios) and develop AI agents to address them.
+As of February 2025, we are open-sourcing:
+1. Push-button deployment tooling for environment setup
+2. Framework for recreating:
+   * 6 SRE scenarios
+   * 4 categories of CISO scenarios
+3. Two reference AI agents:
+   * CISO (Chief Information Security Officer) Agent
+   * SRE (Site Reliability Engineering) Agent
 
 ## Scenarios
 ITBench incorporates a collection of problems that we call scenarios. For example, one of the SRE scenarios in ITBench is to resolve a “High error rate on service order-management” in a Kubernetes environment. Another scenario that is relevant for the CISO persona involves assessing the compliance posture for a “new control rule detected for RHEL 9.” Each of the ITBench scenarios are deployed in an operational environment in which problem(s) occur. 
 
-### [CISO Scenarios](./ciso)
+### CISO Scenarios
 These scenarios simulate compliance-related misconfigurations. Each scenario provides:
 - A pre-configured environment with specific compliance issues
 - Tools to detect misconfigurations
 - Validation methods to verify successful remediation
+CISO scenarios are located [here](./ciso).
 
 ### [SRE Scenarios](./sre)
 These scenarios focus on observability and incident response. Each scenario includes:
@@ -30,12 +60,14 @@ These scenarios focus on observability and incident response. Each scenario incl
   - Kubernetes events exporter
 - Simulated faults that trigger service degradation
 - Thereby leading to alerts associated with application performance issues such as increased error rates and latency spikes
+  SRE scenarios are located [here](./sre).
 
 ### [FinOps Scenarios](./sre)
 Each scenario includes:
 - The core SRE observability stack
 - OpenCost integration for cost monitoring
 - Simulated faults trigger cost overrun alerts
+ FinOps scenarios are located [here](./sre) along-side SRE scenarios.
 
 ## Agents
 Two baseline agents (SRE-FinOps and CISO) are being open-sourced with the ITBench.
@@ -50,6 +82,16 @@ Source code repository [here](https://github.com/IBM/itbench-ciso-caa-agent).
 
 ### SRE Agent
 Source code repository [here](https://github.com/IBM/itbench-sre-agent).
+
+### How to Cite
+```
+@misc{jha2025itbench,
+      title={ITBench: Evaluating AI Agents across Diverse Real-World IT Automation Tasks},
+      author={Jha, Saurabh and Arora, Rohan and Watanabe, Yuji and others},
+      year={2025},
+      url={https://github.com/IBM/itbench-sample-scenarios/blob/main/it_bench_arxiv.pdf}
+}
+```
 
 ## Contributors
 - Saurabh Jha
@@ -97,6 +139,7 @@ Source code repository [here](https://github.com/IBM/itbench-sre-agent).
 - Ruchir Puri
 
 ## Contacts
+- agent-bench-automation@ibm.com
 - Saurabh Jha (saurabh.jha@ibm.com)
 - Yuji Wantabe (muew@jp.ibm.com)
 - Ruchi Mahindru (rmahindr@us.ibm.com)
