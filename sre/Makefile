@@ -127,7 +127,7 @@ awx_configure_deinit:
 
 # TODO: See why the OBJC_DISABLE_INITIALIZE_FORK_SAFETY is needed
 
-.PHONY: documentation
+.PHONY: incident documentation
 documentation: ## Generates documentation for all incidents
 	export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES; \
 	ansible-playbook base.yaml --tags "documentation"
@@ -137,6 +137,11 @@ validate_docs: ## Validates documention for an incident
 	export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES; \
 	ansible-playbook base.yaml --tags "single_doc_validate,incident_$(INCIDENT_NUMBER)" \
 		--extra-vars "doc_incident_number=$(INCIDENT_NUMBER)"
+
+.PHONY: Fault injection documentation
+injection_docs: ## Generates documentation for all fault injection
+	export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES; \
+	ansible-playbook base.yaml --tags "injection_docs"
 
 .PHONY: check_alerts
 check_alerts:

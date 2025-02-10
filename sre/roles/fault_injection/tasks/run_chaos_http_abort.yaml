@@ -1,3 +1,21 @@
+- name: Document this fault injection
+  set_fact:
+    injection_docs: "{{ injection_docs | default([]) + [curr_docs] }}"
+  vars:
+    curr_docs:
+      id: 6
+      name: "Chaos HTTP Abort"
+      author: "Edward Lorenz (chaos@example.com)"
+      description: "Create httpchaos to abort all POST requests coming to quoteservice."
+      application: "otel_astronomy_shop"
+      fault_type: "ChaosMesh"
+      required_fields:
+        - "chaos_mesh_namespace_project_name"
+        - "target_label_name1"
+        - "target_namespace_name"
+  tags:
+    - injection_docs
+
 - name: Inject HTTP abort chaos leveraging the Chaos framework
   kubernetes.core.k8s:
     state: present

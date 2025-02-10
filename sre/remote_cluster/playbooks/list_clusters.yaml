@@ -17,6 +17,12 @@
         cmd: "{{ kops_path }} get clusters --state s3://{{ s3name}} "
       register: clusters_output
 
-    - name: Display all clusters
+    - name: Format clusters output and display as a table
+      shell: |
+        echo "{{ clusters_output.stdout_lines | join('\n') }}" | column -t
+      register: formatted_output
+
+    - name: Show all clusters in formatted table
       debug:
-        msg: "{{ clusters_output.stdout_lines }}"
+        msg: "{{ formatted_output.stdout_lines }}"
+

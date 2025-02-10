@@ -1,3 +1,23 @@
+- name: Document this fault injection
+  set_fact:
+    injection_docs: "{{ injection_docs | default([]) + [curr_docs] }}"
+  vars:
+    curr_docs:
+      id: 7
+      name: "Resource Unavailable and Memory Resource Limit on Namespace"
+      author: "Edward Lorenz (chaos@example.com)"
+      description: "Make the search pod unavailable and apply memory limit on the namespace"
+      application: "deathstarbench_hotel_reservations"
+      fault_type: "Custom"
+      required_fields:
+        - "resource_quotas.resources"
+        - "item.metadata.name"
+        - "target_deployment_name"
+        - "target_namespace_name"
+        - "rs_name"
+  tags:
+    - injection_docs
+
 - name: Fetch resource quotas in the namespace
   kubernetes.core.k8s_info:
     api_version: v1
