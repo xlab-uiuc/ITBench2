@@ -1,6 +1,6 @@
 # CISO (Chief Information Security Officer) Sample Task Scenarios
 
-Here is an example of Task Scenario used in an automation package to benchmark Agent for CISOs on [the IT-Bench](https://github.ibm.com/project-polaris/agent-bench-automation).
+Here is an example of Task Scenario used in an automation package to benchmark Agent for CISOs.
 
 This repository contains following 4 category of scenarios:
 
@@ -14,8 +14,6 @@ This repository contains following 4 category of scenarios:
 ```
 
 Each scenario includes a setup for a compliance misconfigured environment and tools to check and address if the misconfiguration is resolved or not. 
-
-For the detailed design, please refer to [IT-Bench Design Doc](https://github.ibm.com/project-polaris/agent-bench-automation/blob/main/docs/bench-design-doc.md).
 
 ## Table of Contents
 
