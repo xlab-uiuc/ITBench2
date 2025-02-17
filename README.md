@@ -8,7 +8,65 @@ ITBench uses open source technologies to create completely repeatable and reprod
 ![itbench_sre_task_scenario.png](./docs/itbench_sre_task_scenario.png)
 While this repository focuses on scenarios, an open-source Language Model (LM)-based SRE-Agent that aims to diagnose and remediate issues in these scenario environments can be found [here](https://github.com/IBM/itbench-sre-agent). 
 
+### Project Structure
+
+This project uses Ansible to automate the deployment and undeployment of technologies to a Kubernetes cluster and the injection and removal of faults. 
+The playbook run is configured using variables defined in `group\_vars`.
+
+| Directory                   | Purpose                                                                                                      |
+|-----------------------------|--------------------------------------------------------------------------------------------------------------|
+| `roles/observability_tools` | Handles  the deployment and removal of observability tools                                                   |
+| `roles/sample_applications` | Handles the deployment and removal of sample applications                                                    |
+| `roles/fault_injection`     | Provides reusable fault injection mechanisms                                                                 |
+| `roles/fault_removal`       | Provides mechanisms to remove (injected) faults from the environment                                         |
+| `roles/incident_`           | Contains scenarios that leverage the fault injection and removal mechanisms defined in the directories above |
+
+## Recommended Software
+
+### MacOS
+
+- [Homebrew](https://brew.sh/)
+
+## Required Software
+
+- [Python3](https://www.python.org/downloads/) (v3.12.Z)
+- [Helm](https://helm.sh/docs/intro/install/) (v3.16+)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/)
+
+### Installing Required Software via Homebrew (MacOS)
+
+1. Install [Homebrew](https://brew.sh/)
+
+2. Install required software
+```bash
+brew install helm
+brew install kubectl
+brew install python@3.12
+```
+
 ## Getting Started – Deploying an Incident Scenario
+
+### Installing Dependencies
+
+1. Create a Python virtual environment
+```bash
+python3.12 -m venv venv
+source venv/bin/activate
+```
+
+2. Install Python dependencies
+```bash
+python -m pip install -r requirements.txt
+```
+
+3. Install Ansible collections.
+```bash
+ansible-galaxy install -r requirements.yaml
+```
+
+_Note: These steps only need to be done once upon the initial set up._
+_Note: Depending on what kind of cluster setup is needed, further dependencies may need to be installed. Please see the below section for further details._
+
 ### Cluster Setup
 
 #### Local Cluster
@@ -19,7 +77,7 @@ For instruction on how to create a kind cluster, please see the instructions [he
 
 For instruction on how to create an cloud provider based Kubernetes cluster, please see the instructions [here](./remote_cluster/README.md). 
 
-Currently, only AWS is supported.
+Currently, only AWS is supported. AWS clusters are provisioned using [kOps](https://kops.sigs.k8s.io/).
 
 ### Running the Incident Scenarios
 
