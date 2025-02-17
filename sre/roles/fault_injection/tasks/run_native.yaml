@@ -1,4 +1,23 @@
 ---
+- name: Document this fault injection
+  set_fact:
+    injection_docs: "{{ injection_docs | default([]) + [curr_docs] }}"
+  vars:
+    curr_docs:
+      id: 3
+      name: "Fault injection based on feature flags FlagD"
+      author: "Edward Lorenz (chaos@example.com)"
+      description: "Turn the FlagD on to inject various fault scenarios"
+      application: "otel_astronomy_shop"
+      fault_type: "FlagD"
+      required_fields:
+        - "otel_astronomy_app_namespace_project_name"
+        - "otel_astronomy_app_installation_name"
+        - "configmap_output.resources[0].data['demo.flagd.json']"
+        - "flagd_deployment_restart_output.stdout"
+  tags:
+    - injection_docs
+
 - name: Fetch the ConfigMap using the Kubernetes API
   kubernetes.core.k8s_info:
     api_version: v1

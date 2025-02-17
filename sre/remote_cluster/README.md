@@ -1,36 +1,19 @@
 # Remote Cluster Setup
 
-Creates a K8 cluster using kOps on AWS. It uses Ansible playbooks to automate the cluster creation and support some of the workflows. 
+__Note: The following setup guide has been verified and tested on MacOS, Ubuntu, and Fedora using the perscribed details.__
 
-Steps are largely based on [https://aws.amazon.com/blogs/compute/kubernetes-clusters-aws-kops/](https://aws.amazon.com/blogs/compute/kubernetes-clusters-aws-kops/)
+_Note: The following guide has been largely based on this [blog](https://aws.amazon.com/blogs/compute/kubernetes-clusters-aws-kops/)._
 
-# Developer Guide
-
-## Prerequisites
-
-1. [Python3.12](https://www.python.org/downloads/)
+_Note: The following setup guide presumes that the required software listed [here](./README.md#required-software) has been installed along with [creating the virtual environment and installing the dependencies](./README.md#installing-dependencies). If it has not, please go back and do so before following this document._
 
 ## First Time Setup
 
-This setup has been tested on MacOSX, Ubuntu and Fedora.
-
-1. Create an environment using venv.
-```bash
-python3.12 -m venv aws
-source aws/bin/activate
-```
-
-2. Install Python dependencies from the same directory as this README (remote_cluster).
+1. Install Python dependencies
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-3. Install Ansible collections.
-```bash
-ansible-galaxy install -r requirements.yaml
-```
-
-4. Create `variables.yaml` and update the python interpreter.
+2. Create `variables.yaml` and update the python interpreter.
 ```bash
 cp -n playbooks/variables.yaml.example playbooks/variables.yaml
 ```
@@ -78,9 +61,13 @@ make get_kcfg
 ```bash
 export KUBECONFIG=/tmp/<downloaded yaml>
 kubectl get pod --all-namespaces
-``` 
+```
 
-4. Now let's head back to the [parent README](../README.md).
+```yaml
+kubeconfig: "/tmp/<downloaded yaml>"
+```
+
+4. Now let's head back to the [parent README](../README.md) to deploy the incidents.
    
 5. Once done with the experiment runs, to destroy the cluster, run the following command:
 ```bash
@@ -88,7 +75,25 @@ make delete
 ```
 
 _Note_: For a full list of `make` commands, run the following command:
-
 ```bash
 make help
+```
+
+## FAQ
+
+### How do I access the observability stack's frontends?
+
+Once you have deployed the observability stack, run the following command to find the Ingress address for deployed frontends:
+
+```bash
+kubectl get ingress -A
+```
+
+To access the Granfana dashboard, copy the address for the `prometheus-grafana` ingress resource from the terminal and paste it into the browser with the following prefix: `/prometheus`.
+
+To access the Opencost dashboard, copy the address for the `opencost-ingress` ingress resource from the terminal and paste it into the browser.
+
+```console
+http://<prometheus-granfana address>/prometheus
+http://<opencost-ingress address>
 ```

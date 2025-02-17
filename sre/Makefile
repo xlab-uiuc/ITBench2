@@ -4,12 +4,14 @@ EXECUTE_CHECKS_IN_BACKGROUND ?= false
 USE_JAEGER_QUERY_ENDPOINT ?= true
 
 INCIDENT_NUMBER ?= 1
-
+NUMBER_OF_RUNS = 1
 # TODO: Re-think the end to end experience
 
+FINOPS_SCENARIOS := 37 38
 HOTEL_RESERVATION_SCENARIOS := 102 210 211 212
 
 IS_DEBUG_SCENARIO ?= true
+IS_FINOPS_SCENARIO := $(shell echo "$(FINOPS_SCENARIOS)" | grep -w "$(INCIDENT_NUMBER)" > /dev/null && echo "true" || echo "false")
 IS_HOTEL_RESERVATION_SCENARIO := $(shell echo "$(HOTEL_RESERVATION_SCENARIOS)" | grep -w "$(INCIDENT_NUMBER)" > /dev/null && echo "true" || echo "false")
 SAMPLE_APPLICATION := $(shell echo "$(HOTEL_RESERVATION_SCENARIOS)" | grep -w "$(INCIDENT_NUMBER)" > /dev/null && echo "dsb_hotel_reservation" || echo "otel_astronomy_shop")
 
@@ -99,19 +101,39 @@ else
 		--extra-vars "sample_application=$(SAMPLE_APPLICATION)"
 endif
 
-.PHONY: start_incident
+.PHONY: deploy_scenario_application
 ifeq ($(IS_HOTEL_RESERVATION_SCENARIO),true)
-start_incident: deploy_observability_stack deploy_hotel_reservation inject_incident_fault ## Starts an incident by deploying a stack, application, and fault for an incident
+deploy_scenario_application: deploy_hotel_reservation
 else 
-start_incident: deploy_observability_stack deploy_astronomy_shop inject_incident_fault
+deploy_scenario_application: deploy_astronomy_shop
 endif
 
-.PHONY: stop_incident
+.PHONY: undeploy_scenario_application
 ifeq ($(IS_HOTEL_RESERVATION_SCENARIO),true)
-stop_incident: remove_incident_fault undeploy_hotel_reservation undeploy_astronomy_shop undeploy_observability_stack ## Stops an incident by undeploying a stack, application, and fault for an incident
+undeploy_scenario_application: undeploy_hotel_reservation
 else
-stop_incident: remove_incident_fault undeploy_astronomy_shop undeploy_astronomy_shop undeploy_observability_stack
+undeploy_scenario_application: undeploy_astronomy_shop
 endif
+
+.PHONY: deploy_scenario_tools
+ifeq ($(IS_FINOPS_SCENARIO),true)
+deploy_scenario_tools: deploy_finops_stack
+else
+deploy_scenario_tools: deploy_observability_stack
+endif
+
+.PHONY: undeploy_scenario_tools
+ifeq ($(IS_FINOPS_SCENARIO),true)
+undeploy_scenario_tools: undeploy_finops_stack
+else
+undeploy_scenario_tools: undeploy_observability_stack
+endif
+
+.PHONY: start_incident
+start_incident: deploy_scenario_tools deploy_scenario_application inject_incident_fault ## Starts an incident by deploying a stack, application, and fault for an incident
+
+.PHONY: stop_incident
+stop_incident: remove_incident_fault undeploy_scenario_application undeploy_scenario_tools ## Stops an incident by undeploying a stack, application, and fault for an incident
 
 .PHONY: awx_setup
 awx_setup:
@@ -127,7 +149,7 @@ awx_configure_deinit:
 
 # TODO: See why the OBJC_DISABLE_INITIALIZE_FORK_SAFETY is needed
 
-.PHONY: documentation
+.PHONY: incident documentation
 documentation: ## Generates documentation for all incidents
 	export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES; \
 	ansible-playbook base.yaml --tags "documentation"
@@ -137,6 +159,11 @@ validate_docs: ## Validates documention for an incident
 	export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES; \
 	ansible-playbook base.yaml --tags "single_doc_validate,incident_$(INCIDENT_NUMBER)" \
 		--extra-vars "doc_incident_number=$(INCIDENT_NUMBER)"
+
+.PHONY: Fault injection documentation
+injection_docs: ## Generates documentation for all fault injection
+	export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES; \
+	ansible-playbook base.yaml --tags "injection_docs"
 
 .PHONY: check_alerts
 check_alerts:
@@ -151,3 +178,46 @@ else
 		--extra-vars "sample_application=$(SAMPLE_APPLICATION)" \
 		$(BOOK_KEEPING_EXTRA_VARS) &
 endif
+
+
+.PHONY: e2e_awx_init_stage_one
+e2e_awx_init_stage_one: ## Given an incident number, run_uuid intitialize the scenario run leveraging an AWX node
+	# Get cluster to be used configuration
+	KOPS_STATE_STORE=s3://${S3_BUCKET_NAME} kops export kubecfg ${CLUSTER_ASSIGNED_NAME} --admin --kubeconfig /tmp/${CLUSTER_ASSIGNED_NAME}.yaml; \
+        ansible-playbook -v base.yaml --tags "awx_scenario_setup" --extra-vars "relevant_kubeconfig_file_path=/tmp/${CLUSTER_ASSIGNED_NAME}.yaml scenario_number=${INCIDENT_NUMBER} state=present sample_application=${SAMPLE_APPLICATION} awx_kubeconfig=${AWX_KUBECONFIG} s3_bucket_name_for_results='sre-runner-with-awx' sre_bench_runner=true domain=sre"; \
+	ansible-playbook -v base.yaml --tags "workflow_setup_stage_one" --extra-vars "scenario_number=${INCIDENT_NUMBER} state=present sample_application=${SAMPLE_APPLICATION} awx_kubeconfig=${AWX_KUBECONFIG} sre_bench_runner=true domain=sre"; \
+	ansible-playbook -v base.yaml --tags "workflow_launch_stage_one" --extra-vars "run_uuid=${RUN_UUID} sre_agent_name__version_number=${PARTICIPANT_AGENT_UUID} scenario_number=${INCIDENT_NUMBER} number_of_runs=${NUMBER_OF_RUNS} state=present sample_application=${SAMPLE_APPLICATION} awx_kubeconfig=${AWX_KUBECONFIG} s3_bucket_name_for_results='sre-runner-with-awx' sre_bench_runner=true domain=sre";
+
+.PHONY: e2e_awx_stage_three
+e2e_awx_stage_three: ## Given an incident number, run_uuid end the scenario run leveraging an AWX node
+	# Get cluster to be used configuration
+	KOPS_STATE_STORE=s3://${S3_BUCKET_NAME} kops export kubecfg ${CLUSTER_ASSIGNED_NAME} --admin --kubeconfig /tmp/${CLUSTER_ASSIGNED_NAME}.yaml; \
+	ansible-playbook -v base.yaml --tags "workflow_setup_stage_three" --extra-vars "scenario_number=${INCIDENT_NUMBER} state=present sample_application=${SAMPLE_APPLICATION} awx_kubeconfig=${AWX_KUBECONFIG} sre_bench_runner=true domain=sre"; \
+	ansible-playbook -v base.yaml --tags "workflow_launch_stage_three" --extra-vars "run_uuid=${RUN_UUID} sre_agent_name__version_number=${PARTICIPANT_AGENT_UUID} scenario_number=${INCIDENT_NUMBER} number_of_runs=${NUMBER_OF_RUNS} state=present sample_application=${SAMPLE_APPLICATION} awx_kubeconfig=${AWX_KUBECONFIG} s3_bucket_name_for_results='sre-runner-with-awx' sre_bench_runner=true domain=sre";
+
+.PHONY: evaluation
+.SILENT: evaluation
+evaluation:
+	KOPS_STATE_STORE=s3://${S3_BUCKET_NAME} kops export kubecfg ${CLUSTER_ASSIGNED_NAME} --admin --kubeconfig /tmp/${CLUSTER_ASSIGNED_NAME}.yaml > /tmp/eval.out; \
+	ansible-playbook -v base.yaml --tags "evaluation" --extra-vars "incident_number=$(INCIDENT_NUMBER) \
+	                                                                shared_workspace=\"$(SHARED_WORKSPACE)\" \
+																	s3_bucket_name_for_results='sre-runner-with-awx' \
+																	sre_agent_name__version_number=${PARTICIPANT_AGENT_UUID} \
+																	run_uuid=${RUN_UUID} \
+																	scenario_number=$(INCIDENT_NUMBER) \
+																	run_number=1  \
+																	location=${location} \
+																	sre_bench_runner=true \
+																	domain=sre" > /tmp/eval.out ; \
+	cat evaluation/e2e_new/incident_reports/$(INCIDENT_NUMBER).json
+	rm evaluation/e2e_new/incident_reports/$(INCIDENT_NUMBER).json
+
+.SILENT: bundle_status
+bundle_status:
+	ansible-playbook base.yaml --tags "bundle_status" --extra-vars "run_uuid=${RUN_UUID} sre_agent_name__version_number=${PARTICIPANT_AGENT_UUID} scenario_number=${INCIDENT_NUMBER} run_number=1 bundle_status_file=roles/bundle_status/status-$$INCIDENT_NUMBER.json s3_bucket_name_for_results='sre-runner-with-awx' sre_bench_runner=true domain=sre" > /tmp/status.out; \
+	cat roles/bundle_status/status-${INCIDENT_NUMBER}.json
+	rm roles/bundle_status/status-${INCIDENT_NUMBER}.json
+
+.SILENT: bundle_info
+bundle_info:
+	ANSIBLE_STDOUT_CALLBACK=json ansible-playbook base.yaml --tags "get_bundle_info" --extra-vars "run_uuid=${RUN_UUID} sre_agent_name__version_number=${PARTICIPANT_AGENT_UUID} scenario_number=${INCIDENT_NUMBER} run_number=1 s3_bucket_name_for_results='sre-runner-with-awx' sre_bench_runner=true" | jq '.plays[].tasks[] | select(.task.name == "bundle_info : Return grafana url").hosts.localhost.msg'
