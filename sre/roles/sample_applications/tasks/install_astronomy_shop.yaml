@@ -66,6 +66,8 @@
             requests:
               cpu: 10m
               memory: 250Mi
+            limits:
+              memory: 500Mi
         cartService:
           resources:
             requests:
@@ -105,6 +107,8 @@
             requests:
               cpu: 25m
               memory: 300Mi
+            limits:
+              memory: 500Mi
         frontend:
           resources:
             requests:
@@ -122,6 +126,8 @@
             requests:
               cpu: 25m
               memory: 550Mi
+            limits:
+              memory: 700Mi
         loadgenerator:
           imageOverride:
             repository: quay.io/it-bench/loadgenerator
@@ -154,6 +160,8 @@
             requests:
               cpu: 50m
               memory: 100Mi
+            limits:
+              memory: 700Mi
         shippingService:
           resources:
             requests: 
