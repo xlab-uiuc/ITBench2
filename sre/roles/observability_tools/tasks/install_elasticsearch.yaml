@@ -37,6 +37,8 @@
         value_type: raw
       - value: data.persistence.size="32Gi"
         value_type: raw
+      - value: data.resourcesPreset="large"
+        value_type: raw
   tags:
     - install_tools
   when:
