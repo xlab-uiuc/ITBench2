@@ -1,0 +1,48 @@
+- name: Clone Saurabh's fork of DeathStarBench Social Network
+  ansible.builtin.git:
+    repo: https://github.com/saurabhjha1/DeathStarBench.git
+    dest: roles/sample_applications/DeathStarBench
+    single_branch: yes
+    version: master
+    force: yes
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "dsb_social_network"
+
+
+
+- name: Identify and set Prometheus service name for Social Network
+  ansible.builtin.shell: KUBECONFIG={{ kubeconfig }} kubectl get services -o=jsonpath='{.items[?(@.spec.ports[0].port==9090)].metadata.name}' -n {{ prometheus_namespace_project_name }} | awk '{ if ($1 == "prometheus-operated") print $2; else print $1 }'
+  register: command_output_social
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "dsb_social_network"
+
+- ansible.builtin.set_fact:
+    prometheus_service_name: "{{ command_output_social.stdout }}"
+    when: command_output_social.stdout | length > 0
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "dsb_social_network"
+
+- name: Deploy Deathstar Social Network
+  kubernetes.core.helm:
+    name: "{{ deathstarbench_socialnetwork_app_installation_name }}"
+    kubeconfig_path: "{{ kubeconfig }}"
+    chart_ref: roles/sample_applications/DeathStarBench/socialNetwork/helm-chart/socialnetwork
+    release_namespace: "{{ deathstarbench_socialnetwork_app_namespace_project_name }}"
+    release_state: present
+    create_namespace: true
+    wait: true
+    set_values:
+      - value: "global.monitoring.prometheusAddress=http://{{ prometheus_service_name }}.{{ prometheus_namespace_project_name }}:9090/api/v1/otlp"
+        value_type: raw
+      - value: "global.nameOverride={{ deathstarbench_socialnetwork_app_installation_name }}"
+        value_type: raw
+  tags:
+    - install_sample_applications
+  when:
+    - sample_application == "dsb_social_network"
