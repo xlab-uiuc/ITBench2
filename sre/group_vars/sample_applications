@@ -16,3 +16,7 @@ is_otel_astronomy_shop_dynamic_load: false
 # Deathstarbench's Hotel Reservation(s) app configuration
 deathstarbench_hotelreservation_app_namespace_project_name: "hotel-reservations"
 deathstarbench_hotelreservation_app_installation_name: "hotel-reservations"
+
+#social network config
+deathstarbench_socialnetwork_app_namespace_project_name: "social-network-namespace"
+deathstarbench_socialnetwork_app_installation_name: "social-network"
