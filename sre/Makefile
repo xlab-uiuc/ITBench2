@@ -66,6 +66,16 @@ undeploy_hotel_reservation: ## Undeploys the Hotel Reservation application
 	ansible-playbook -v base.yaml --tags "uninstall_sample_applications" \
 		--extra-vars "sample_application=dsb_hotel_reservation"
 
+.PHONY: deploy_socialnetwork
+deploy_socialnetwork: ## Deploys the Social Network application
+	ansible-playbook -v base.yaml --tags "install_sample_applications" \
+		--extra-vars "sample_application=dsb_social_network"
+
+.PHONY: undeploy_socialnetwork
+undeploy_socialnetwork: ## Undeploys the Social Network application
+	ansible-playbook -v base.yaml --tags "uninstall_sample_applications" \
+		--extra-vars "sample_application=dsb_social_network"
+
 .PHONY: install_chaos_mesh
 install_chaos_mesh: ## Installs a Chaos mesh to the cluster
 	ansible-playbook -v base.yaml --tags "chaos_mesh_installation" \
