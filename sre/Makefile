@@ -66,12 +66,12 @@ undeploy_hotel_reservation: ## Undeploys the Hotel Reservation application
 	ansible-playbook -v base.yaml --tags "uninstall_sample_applications" \
 		--extra-vars "sample_application=dsb_hotel_reservation"
 
-.PHONY: deploy_socialnetwork
+.PHONY: deploy_social_network
 deploy_socialnetwork: ## Deploys the Social Network application
 	ansible-playbook -v base.yaml --tags "install_sample_applications" \
 		--extra-vars "sample_application=dsb_social_network"
 
-.PHONY: undeploy_socialnetwork
+.PHONY: undeploy_social_network
 undeploy_socialnetwork: ## Undeploys the Social Network application
 	ansible-playbook -v base.yaml --tags "uninstall_sample_applications" \
 		--extra-vars "sample_application=dsb_social_network"
