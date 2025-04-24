@@ -1,0 +1,23 @@
+---
+id: 4
+application: Other
+
+scenario:
+  complexity: Low
+  inject_fault_unused: false
+  agent_operation_timeout_sec: 3000
+
+fault:
+  - entity:
+      name: not-yet-provided
+      kind: Other
+      comment: "Please identify the Kubernetes object here."
+    condition: "Please fill in"
+
+manual_actions:
+  - "valid action 1"
+  - "valid action 2"
+
+automations:
+  - "auto one"
+  - "auto two"

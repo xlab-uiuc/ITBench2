@@ -1,0 +1,79 @@
+# roles/fault_injection/tasks/inject_k8s_port_misconfig.yml
+- name: Document this port misconfig fault injection
+  set_fact:
+    injection_docs: "{{ injection_docs | default([]) + [ port_misconfig_docs ] }}"
+  vars:
+    port_misconfig_docs:
+      id: 8
+      name: "Port Misconfiguration on Service"
+      author: "Your Name <you@example.com>"
+      description: "Mismatch Service port vs. Pod containerPort to break traffic routing"
+      application: "{{ sample_application }}"
+      fault_type: "Custom"
+      required_fields:
+        - "target_service_name"
+        - "target_namespace_name"
+        - "misconfig_port"
+  tags: injection_docs
+
+- name: Fetch Service in the namespace before misconfig
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    name: "{{ target_service_name }}"
+    namespace: "{{ target_namespace_name }}"
+    kubeconfig: "{{ kubeconfig }}"
+  register: svc_before
+  when:
+    - is_k8s_port_misconfig
+    - is_fault_injection
+  tags: incident_port_misconfig
+
+- name: Debug Service ports before misconfig
+  debug:
+    msg: "Service {{ target_service_name }} ports before: {{ svc_before.resources[0].spec.ports }}"
+  when:
+    - is_k8s_port_misconfig
+    - is_fault_injection
+  tags: incident_port_misconfig
+
+- name: Inject port misconfiguration into Service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ target_service_name }}"
+        namespace: "{{ target_namespace_name }}"
+      spec:
+        ports:
+          - port: "{{ misconfig_port }}"
+            targetPort: "{{ misconfig_port }}"
+            protocol: TCP
+  register: svc_misconfig_result
+  when:
+    - is_k8s_port_misconfig
+    - is_fault_injection
+  tags: incident_port_misconfig
+
+- name: Fetch Service after misconfig
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    name: "{{ target_service_name }}"
+    namespace: "{{ target_namespace_name }}"
+    kubeconfig: "{{ kubeconfig }}"
+  register: svc_after
+  when:
+    - is_k8s_port_misconfig
+    - is_fault_injection
+  tags: incident_port_misconfig
+
+- name: Debug Service ports after misconfig
+  debug:
+    msg: "Service {{ target_service_name }} ports after: {{ svc_after.resources[0].spec.ports }}"
+  when:
+    - is_k8s_port_misconfig
+    - is_fault_injection
+  tags: incident_port_misconfig

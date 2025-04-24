@@ -1,0 +1,102 @@
+# roles/fault_injection/tasks/inject_scale_pods_to_zero.yaml
+
+---
+- name: Document this scale‑to‑zero fault injection
+  set_fact:
+    injection_docs: "{{ injection_docs | default([]) + [ scale_zero_docs ] }}"
+  vars:
+    scale_zero_docs:
+      id: 9
+      name: "Scale Pods to Zero"
+      author: "Your Name <you@example.com>"
+      description: "Scale the target Deployment to zero replicas to simulate an outage."
+      application: "{{ sample_application }}"
+      fault_type: "Virtualization"
+      required_fields:
+        - "target_namespace_name"
+        - "target_deployment_name"
+  tags:
+    - injection_docs
+
+- name: Fetch Deployment before scaling
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig }}"
+    api_version: apps/v1
+    kind: Deployment
+    namespace: "{{ target_namespace_name }}"
+    name: "{{ target_deployment_name }}"
+  register: deploy_before
+  when:
+    - is_scale_pods_zero
+    - is_fault_injection
+  tags:
+    - incident_scale_pods_zero
+
+- name: Debug desired replicas before injection
+  debug:
+    msg: "Before injection: '{{ target_deployment_name }}' replicas={{ deploy_before.resources[0].spec.replicas }}"
+  when:
+    - is_scale_pods_zero
+    - is_fault_injection
+  tags:
+    - incident_scale_pods_zero
+
+- name: Scale Deployment replicas to zero
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ target_deployment_name }}"
+        namespace: "{{ target_namespace_name }}"
+      spec:
+        replicas: 0
+  register: scale_zero_result
+  when:
+    - is_scale_pods_zero
+    - is_fault_injection
+  tags:
+    - incident_scale_pods_zero
+
+- name: Fetch Deployment after scaling
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig }}"
+    api_version: apps/v1
+    kind: Deployment
+    namespace: "{{ target_namespace_name }}"
+    name: "{{ target_deployment_name }}"
+  register: deploy_after
+  when:
+    - is_scale_pods_zero
+    - is_fault_injection
+  tags:
+    - incident_scale_pods_zero
+
+- name: Debug available replicas after injection
+  debug:
+    msg: "After injection: '{{ target_deployment_name }}' availableReplicas={{ deploy_after.resources[0].status.availableReplicas | default(0) }}"
+  when:
+    - is_scale_pods_zero
+    - is_fault_injection
+  tags:
+    - incident_scale_pods_zero
+
+- name: Scale Deployment replicas back to 1 (fault recovery)
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ target_deployment_name }}"
+        namespace: "{{ target_namespace_name }}"
+      spec:
+        replicas: 1
+  when:
+    - is_scale_pods_zero
+    - is_fault_removal
+  tags:
+    - incident_scale_pods_zero

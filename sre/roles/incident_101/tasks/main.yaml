@@ -1,0 +1,28 @@
+---
+
+- name: Validate required fields for documentation
+  assert:
+    that:
+      - id is defined
+      - application is defined
+      - scenario is defined
+      - fault is defined
+      - manual_actions is defined
+      - automations is defined
+    fail_msg: "One or more required documentation fields are missing."
+  tags:
+    - documentation
+
+- name: Add incident documentation to list
+  set_fact:
+    documented_incidents: >-
+      {{ documented_incidents | default([]) + [ {
+        'id': id,
+        'application': application,
+        'scenario': scenario,
+        'fault': fault,
+        'manual_actions': manual_actions,
+        'automations': automations
+      } ] }}
+  tags:
+    - documentation
